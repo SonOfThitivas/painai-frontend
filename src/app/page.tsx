@@ -6,7 +6,6 @@ import { Box } from "@mui/material";
 
 import SideBarNavigator from "./components/SideBarNavigator";
 
-
 export default function Home() {
     
     // to avaliable Next.js Fast Reload
@@ -23,7 +22,8 @@ export default function Home() {
             <Box component="div" sx={{width: 1}}>
                 <Map posix={[13.82152778382708, 100.51345467567444]}/>
             </Box>
-        </Box>
+        </Box>  
     </div>
+
   );
 }

@@ -20,6 +20,7 @@ import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
 import { red } from '@mui/material/colors';
 import { Button } from '@mui/material';
+import Link from "next/link";
 
 const drawerWidth = 240;
 
@@ -109,18 +110,9 @@ export default function SideBarNavigator() {
   const theme = useTheme();
   const [open, setOpen] = React.useState(true);
   const listItem = [
-    {
-        name: "Home",
-        func: null,
-    },
-    {
-        name: "Activity Lobby",
-        func: null,
-    },
-    {
-        name: "Create a Activity",
-        func: null,
-    }
+    { name: 'Home', path: '/' },
+    { name: 'Activity Lobby', path: '/activity-lobby' },
+    { name: 'Create an Activity', path: '/create-activity' },
   ]
 
   const handleDrawer = () => {
@@ -162,21 +154,6 @@ export default function SideBarNavigator() {
         
         {/* <OpenDrawerButton theme={theme}/> */}
 
-        <ButtonDrawer onClick={handleDrawer} open={open}
-        // sx={{
-            
-        //     position:"fixed",
-        //     zIndex:2000,
-        //     left:drawerWidth,
-        //     top:"50%"
-            
-        // }}
-        >
-            {/* {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />} */}
-            {open === true ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-
-        </ButtonDrawer>
-
         <Drawer
             sx={{
             width: drawerWidth,
@@ -198,18 +175,24 @@ export default function SideBarNavigator() {
             </DrawerHeader>
 
             <Divider />
+            
             <List>
-            {listItem.map((obj, index) => (
-                <ListItem key={obj.name} disablePadding>
-                <ListItemButton>
-                    {/* <ListItemIcon>
-                    {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                    </ListItemIcon> */}
-                    <ListItemText primary={obj.name} />
-                </ListItemButton>
+              {listItem.map((item) => (
+                <ListItem key={item.name} disablePadding>
+                  <Link
+                    href={item.path}
+                    passHref
+                    style={{ textDecoration: 'none', color: 'inherit', width: '100%' }}
+                  >
+                    <ListItemButton>
+                      <ListItemText primary={item.name} />
+                    </ListItemButton>
+                  </Link>
                 </ListItem>
-            ))}
+              ))}
             </List>
+
+
             <Divider />
         </Drawer>
     
