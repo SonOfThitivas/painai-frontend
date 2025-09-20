@@ -1,6 +1,6 @@
 import { TextField, Button, Box, Typography, Stack } from "@mui/material";
 
-export default function FormPropsTextFields() {
+export default function LoginCard() {
   return (
     <Box
       sx={{
@@ -21,10 +21,10 @@ export default function FormPropsTextFields() {
         }}
       >
         <Stack spacing={2} direction="column">
-          <Typography variant="h5" align="center">
+           <Typography variant="h5" align="center">
             Login
           </Typography>
-
+{/* 
           <TextField
             id="outlined-required"
             label="User ID"
@@ -34,11 +34,16 @@ export default function FormPropsTextFields() {
             label="Password"
             type="password"
             autoComplete="current-password"
-          />
+          /> */}
 
-          <Button variant="contained">
-            Login
+          <Button variant="contained" href="http://localhost:8000/v1/api/auth/google">
+            Login with Google
           </Button>
+
+          <Button variant="contained" href="http://localhost:8000/v1/api/auth/facebook">
+            Login with Facebook
+          </Button>
+
         </Stack>
       </Box>
     </Box>
