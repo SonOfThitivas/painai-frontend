@@ -107,7 +107,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 
 export default function SideBarNavigator() {
   const theme = useTheme();
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = React.useState(false);
   const listItem = [
     {
         name: "Home",
@@ -126,14 +126,6 @@ export default function SideBarNavigator() {
   const handleDrawer = () => {
     setOpen(!open)
   }
-
-  const handleDrawerOpen = () => {
-    setOpen(true);
-  };
-
-  const handleDrawerClose = () => {
-    setOpen(false);
-  };
 
   return (
     <Box sx={{ display: 'flex'}}>
@@ -192,7 +184,7 @@ export default function SideBarNavigator() {
         >
             
             <DrawerHeader>
-                <IconButton onClick={handleDrawerClose}>
+                <IconButton onClick={handleDrawer}>
                     {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
                 </IconButton>
             </DrawerHeader>

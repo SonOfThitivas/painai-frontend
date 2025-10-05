@@ -11,8 +11,8 @@ export async function GET(request: Request) {
         max_participants: 12,
         visibility: "",
         location: {
-            lat: 0,
-            lng: 0,
+            lat: 13.831043,
+            lng: 100.504389,
         },
         created_at: "",
         updated_at: ""
@@ -27,8 +27,8 @@ export async function GET(request: Request) {
         max_participants: 5,
         visibility: "",
         location: {
-            lat: 0,
-            lng: 0,
+            lat: 13.843763,
+            lng: 100.510810,
         },
         created_at: "",
         updated_at: ""
