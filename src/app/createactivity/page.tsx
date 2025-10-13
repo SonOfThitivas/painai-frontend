@@ -10,7 +10,7 @@ import dayjs from "dayjs";
 
 import { useRouter, useSearchParams} from 'next/navigation'
 import { useState } from "react";
-
+import axios from "axios";
 
 function page() {
     const Map = dynamic(
@@ -18,6 +18,7 @@ function page() {
         ssr: false,
         loading: () => <p>Loading...</p>,
     });
+
 
     // state variables
     const router = useRouter()
@@ -28,46 +29,90 @@ function page() {
     const [location, setLocation] = useState<String | null>("");
     const [description, setDescription] = useState<String | null>("");
     const [participation, setParticipation] = useState<number>(5);
-    const [datetime, setDatetime] = useState<Date | null>(null);
+    const [startDatetime, setStartDatetime] = useState<Date | null>(null);
+    const [endDatetime, setEndDatetime] = useState<Date | null>(null);
 
     const [step, setStep] = useState<number | null>(1)
 
-    // handle function
-    const handleSubmit = () => {
-        if (!(title === "" || location === "" || description === "" || datetime === null)){
-            router.push("/")
+    const handleSubmit = async () => {
+        if (!(title === "" || location === "" || description === "" 
+            || startDatetime === null || endDatetime === null)){
+
+            // -------------- to-do request user id --------------
+            
+            const lat:string | null = params.get("lat")
+            const lng:string | null = params.get("lng")
+            const payload: Object = {
+                creator_id: "868cec95-0a6c-4c97-a2be-d0554e3b5f91",
+                // "creator_id": "57af58f8-b2df-4659-99c1-c34035e767c7",
+                title: title,
+                description: description,
+                start_time: startDatetime.toString(),
+                end_time: endDatetime.toString(),
+                max_participants: participation,
+                visibility: "public",
+                latitude: Number(lat),
+                longitude: Number(lng),
+                location: location
+            }
+            // console.log(payload)
+
+            try {
+                const res = await axios.post('http://localhost:8080/api/v1/activity/', payload)
+                console.log('Response:', res.data);
+                router.push('/')
+            } catch (err) {
+                console.error(err);
+                // -------------- to-do alert if error occurs --------------
+            }
         }
     }
-    
+
+
     const handleStep = () => {
-        if (step == 1){
+        if (step === 1){
             setStep(step+1)
-        }
+        } 
+        // -------------- to-do handle step carefully --------------
     }
 
     const handleTitle = (event: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>) => {
         setTitle(event.target.value)
-        console.log(event.target.value)
+        // console.log(event.target.value)
+        // params.set("ti", event.target.value)
+        // router.replace(`?${params.toString()}`)
     }
 
     const handleLocation = (event: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>) => {
         setLocation(event.target.value)
-        console.log(event.target.value) 
+        // console.log(event.target.value)
+        // params.set("lo", event.target.value)
+        // router.replace(`?${params.toString()}`)
     }
 
     const handleDescription = (event: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>) => {
         setDescription(event.target.value)
-        console.log(event.target.value) 
+        // console.log(event.target.value)
+        // params.set("dct", event.target.value)
+        // router.replace(`?${params.toString()}`)
     }
 
     const handleParticipation = (event: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>) => {
         setParticipation(event.target.value)
-        console.log(event.target.value)
+        // console.log(event.target.value)
+        // params.set("pt", event.target.value)
+        // router.replace(`?${params.toString()}`)
     }
 
-    const handleDatetime = (date: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement | Date>) => {
-        setDatetime(date)
-        console.log(dayjs(date).format()) 
+    // -------------- to-do handle datetime overlap --------------
+    const handleStartDatetime = (dt: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement | Date>) => {
+        setStartDatetime(dayjs(dt).format())
+        // console.log(datetime)
+    }
+
+    const handleEndDatetime = (dt: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement | Date>) => {
+        setEndDatetime(dayjs(dt).format())
+        // console.log(datetime)
     }
 
     return (
@@ -154,10 +199,19 @@ function page() {
                             <Box component={"div"} sx={{m:2}}>
                                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                                     <DemoContainer components={['DateTimePicker']}>
-                                        <DateTimePicker label="Start datetime" onChange={handleDatetime}/>
+                                        <DateTimePicker label="Start datetime" onChange={handleStartDatetime}/>
                                     </DemoContainer>
                                 </LocalizationProvider>
                             </Box>
+
+                            <Box component={"div"} sx={{m:2}}>
+                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                    <DemoContainer components={['DateTimePicker']}>
+                                        <DateTimePicker label="End datetime" onChange={handleEndDatetime}/>
+                                    </DemoContainer>
+                                </LocalizationProvider>
+                            </Box>
+
                         </Box>
                     </Box>
                 }
