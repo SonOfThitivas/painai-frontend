@@ -1,6 +1,6 @@
 "use client"
 import dynamic from "next/dynamic";
-import { Box, Button, TextField } from "@mui/material"
+import { Box, Button, createTheme, Grid, TextField, ThemeProvider, Typography } from "@mui/material"
 import { ChangeEventHandler } from "react";
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -13,6 +13,12 @@ import { useState } from "react";
 import axios from "axios";
 
 function page() {
+    const theme = createTheme({
+        typography: {
+            fontFamily: 'var(--font-mitr)',
+        },
+    })
+
     const Map = dynamic(
         () => import("@/app/components/MapPin"), {
         ssr: false,
@@ -55,7 +61,7 @@ function page() {
                 longitude: Number(lng),
                 location: location
             }
-            // console.log(payload)
+            console.log(payload)
 
             try {
                 const res = await axios.post('http://localhost:8080/api/v1/activity/', payload)
@@ -116,9 +122,12 @@ function page() {
     }
 
     return (
+        <ThemeProvider theme={theme}>
         <div>
             <Box component="div" 
             sx={{
+                bgcolor: "lightgrey",
+                minHeight: "100vh",
                 position:"relative", 
                 display:"flex", 
                 justifyContent:"center",
@@ -127,13 +136,14 @@ function page() {
                 {/* header */}
                 <Box component="div"
                 sx={{
+                    fontFamily: 'var(--font-mitr)',
                     position: step === 1 ? "absolute" : "fixed",
                     zIndex:"1000",
                     textAlign:"center",
                     fontSize: 20,
-                    backgroundColor:"white",
-                    border: "2px solid black",
-                    borderRadius: 10,
+                    backgroundColor: "white",
+                    border: "0.5px solid black",
+                    borderRadius: 3,
                     p: 1,
                     m: 2,
                 }}>
@@ -154,17 +164,23 @@ function page() {
                     <Box component="div" 
                     maxWidth={1000}
                     sx={{
-                        width: 1,
+                        bgcolor: "white",
+                        boxShadow: "0px 6px 20px rgba(0,0,0,0.08)",
+                        borderRadius: 3,
+                        width: 650,
                         mt:10,
-                        // border: "2px solid red",
                         }}>
-                        <Box component="div" sx={{display: "flex", flexWrap:"wrap", flexDirection:"column",}}>
+                        <Box component="div" sx={{display: "flex", flexWrap:"wrap", flexDirection:"column"}}>
+                            <Typography align="center" sx={{m:2,fontSize:22}}>
+                                Activity Details
+                            </Typography>
+
                             <TextField
                                 // required
-                                // id="outlined-required"
+                                // id="outlined-required"   
                                 sx={{m:2}}
                                 label="Title"
-                                variant="filled"
+                                variant="outlined"
                                 onChange={handleTitle}
                             />
                             <TextField
@@ -172,7 +188,7 @@ function page() {
                                 // id="outlined-required"
                                 sx={{m:2}}
                                 label="Location"
-                                variant="filled"
+                                variant="outlined"
                                 onChange={handleLocation}
                             />
                             <TextField
@@ -182,7 +198,7 @@ function page() {
                                 multiline
                                 rows={4}
                                 // defaultValue="Default Value"
-                                variant="filled"
+                                variant="outlined"
                                 onChange={handleDescription}
                             />
                             <TextField
@@ -193,24 +209,31 @@ function page() {
                                 type="number"
                                 value={participation}
                                 onChange={handleParticipation}
-                                variant="filled"
+                                variant="outlined"
                                 InputProps={{ inputProps: { min: 2, max: 20, step: 1 } }} // optional
                             />
-                            <Box component={"div"} sx={{m:2}}>
-                                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                    <DemoContainer components={['DateTimePicker']}>
-                                        <DateTimePicker label="Start datetime" onChange={handleStartDatetime}/>
-                                    </DemoContainer>
-                                </LocalizationProvider>
-                            </Box>
 
-                            <Box component={"div"} sx={{m:2}}>
-                                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                    <DemoContainer components={['DateTimePicker']}>
-                                        <DateTimePicker label="End datetime" onChange={handleEndDatetime}/>
-                                    </DemoContainer>
-                                </LocalizationProvider>
-                            </Box>
+                            <Grid container direction ="row">
+                                <Grid size={6}>
+                                    <Box component={"div"} sx={{m:2}}>
+                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                            <DemoContainer components={['DateTimePicker']}>
+                                                <DateTimePicker label="Start Date & Time" disablePast onChange={handleStartDatetime}/>
+                                            </DemoContainer>
+                                        </LocalizationProvider>
+                                    </Box>
+                                </Grid>
+
+                                <Grid size={6}>
+                                    <Box component={"div"} sx={{m:2}}>
+                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                            <DemoContainer components={['DateTimePicker']}>
+                                                <DateTimePicker label="End Date & Time" disablePast onChange={handleEndDatetime}/>
+                                            </DemoContainer>
+                                        </LocalizationProvider>
+                                    </Box>
+                                </Grid>
+                            </Grid>
 
                         </Box>
                     </Box>
@@ -254,6 +277,7 @@ function page() {
                 </Box>
             </Box>
         </div>
+        </ThemeProvider>
     )
 }
 
