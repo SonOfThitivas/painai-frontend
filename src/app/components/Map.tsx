@@ -9,7 +9,7 @@ import "leaflet-defaulticon-compatibility";
 
 interface MapProps {
     posix: LatLngExpression | LatLngTuple,
-    data: Array,
+    data: Array<any>,
     zoom?: number,
 }
 

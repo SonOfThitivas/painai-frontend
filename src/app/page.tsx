@@ -19,7 +19,7 @@ export default function Home() {
         loading: () => <p>Loading...</p>,
     });
 
-    const [data, setData] = useState<null | Array>(null);
+    const [data, setData] = useState<null | Array<any>>(null);
 
     useEffect(()=>{
         axios
