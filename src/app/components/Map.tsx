@@ -9,25 +9,16 @@ import "leaflet-defaulticon-compatibility";
 
 interface MapProps {
     posix: LatLngExpression | LatLngTuple,
+    data: Array,
     zoom?: number,
 }
 
 const defaults = {
-    zoom: 18
+    zoom: 10
 }
 
-// click handler
-// function MapEventComponent() {
-//   const map = useMapEvents({
-//     click: (e) => {
-//         console.log(e.latlng)
-//     },
-//   })
-//   return null
-// }
-
 function Map(Map: MapProps){
-    const {zoom = defaults.zoom, posix} = Map
+    const {zoom = defaults.zoom, posix, data} = Map
 
     return(
         <div>
@@ -41,11 +32,17 @@ function Map(Map: MapProps){
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
-                <Marker position={posix}>
-                    <Popup>
-                        A pretty CSS3 popup. <br /> Easily customizable.
-                    </Popup>
-                </Marker>
+                
+                {
+                    data.map((act) => {
+                        return (<Marker key={act.ID} position={[act.Latitude,act.Longitude]}>
+                            <Popup>
+                                {act.Title}
+                            </Popup>
+                        </Marker>)
+                    })
+                }
+
             </MapContainer>
         </div>
     )
