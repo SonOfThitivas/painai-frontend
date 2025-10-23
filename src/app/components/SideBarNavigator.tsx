@@ -112,7 +112,7 @@ export default function SideBarNavigator() {
   const listItem = [
     { name: 'Home', path: '/' },
     { name: 'Activity Lobby', path: '/activity-lobby' },
-    { name: 'Create an Activity', path: '/create-activity' },
+    { name: 'Create an Activity', path: '/createactivity' },
   ]
 
   const handleDrawer = () => {
