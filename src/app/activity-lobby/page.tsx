@@ -1,13 +1,19 @@
 "use client"
 
 import React from 'react';
-import { Box, Typography, Grid } from "@mui/material";
+import { Box, Typography, Grid , createTheme, ThemeProvider} from "@mui/material";
 import SideBarNavigator from "../components/SideBarNavigator";
 import ActivityCard from "../components/ActivityCard";
 import axios from 'axios';
 import dayjs from 'dayjs';
 
 export default function ActivityLobby() {
+    const theme = createTheme({
+        typography: {
+            fontFamily: "var(--font-mitr)",
+        },
+    })
+
     const [data, setData] = React.useState<null | Array<any>>([]);
     const [username, setUsername] = React.useState<null | Array<any>>([]);
 
@@ -51,37 +57,38 @@ export default function ActivityLobby() {
 
     
   return (
-    <Box sx={{ display: 'flex' }}>
-      <SideBarNavigator />
+    <ThemeProvider theme={theme}>
+        <Box sx={{ display: 'flex' }}>
+        <SideBarNavigator />
+        <Box component="main" 
+        sx={{ 
+            flexGrow: 1, p: 3, 
+            justifyItems: 'center',
+            minHeight: '100vh', 
+            backgroundColor: '#f5f5f5' 
+            }}>
+            
+            <Typography variant="h4" gutterBottom>
+                Activity Lobby
+            </Typography>
 
-      <Box component="main" 
-      sx={{ 
-        flexGrow: 1, p: 3, 
-        justifyItems: 'center',
-        minHeight: '100vh', 
-        backgroundColor: '#f5f5f5' 
-        }}>
+            <Grid container spacing={2} direction="column">
+                {   // display all activities, ordering by decreasing date
+                    data.map((act:any) => {
+                    return (<ActivityCard
+                        key={act.ID}
+                        username={act.username}
+                        title={act.Title}
+                        date={dayjs(act.StartTime).format("ddd DD MMM YYYY HH:mm")} // https://day.js.org/docs/en/display/format
+                        place={act.Location}
+                        description={act.Description}>
+                    </ActivityCard>)
+                    })
+                } 
 
-        <Typography variant="h4" gutterBottom>
-          Activity Lobby
-        </Typography>
-
-        <Grid container spacing={2} direction="column">
-            {   // display all activities, ordering by decreasing date
-                data.map((act:any) => {
-                return (<ActivityCard
-                    key={act.ID}
-                    username={act.username}
-                    title={act.Title}
-                    date={dayjs(act.StartTime).format("ddd DD MMM YYYY HH:mm")} // https://day.js.org/docs/en/display/format
-                    place={act.Location}
-                    description={act.Description}>
-                </ActivityCard>)
-                })
-            } 
-
-        </Grid>
-      </Box>
-    </Box>
+            </Grid>
+        </Box>
+        </Box>
+    </ThemeProvider>
   );
 }
