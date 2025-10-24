@@ -2,16 +2,13 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-
-import { Box } from "@mui/material";
-
+import { Box, ThemeProvider} from "@mui/material";
 import SideBarNavigator from "./components/SideBarNavigator";
-
 import axios from "axios";
-
+import theme from "./theme";
 
 export default function Home() {
-    
+
     // to avaliable Next.js Fast Reload
     const Map = dynamic(
         () => import("@/app/components/Map"), {
@@ -31,17 +28,18 @@ export default function Home() {
 
 
   return (
-    <div>
-        <Box component="div" sx={{width:1, position:"relative"}}>
-            <SideBarNavigator />
-            <Box component="div" sx={{width: 1}}>
-                <Map 
-                posix={[13.82152778382708, 100.51345467567444]}
-                data={data}
-                />
-            </Box>
-        </Box>  
-    </div>
-
+    <ThemeProvider theme={theme}>
+        <div>
+            <Box component="div" sx={{width:1, position:"relative"}}>
+                <SideBarNavigator />
+                <Box component="div" sx={{width: 1}}>
+                    <Map 
+                    posix={[13.82152778382708, 100.51345467567444]}
+                    data={data}
+                    />
+                </Box>
+            </Box>  
+        </div>
+    </ThemeProvider>
   );
 }
