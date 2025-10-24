@@ -1,18 +1,13 @@
 "use client"
 
 import dynamic from "next/dynamic";
-
-import { useState } from "react";
-
-import { Box } from "@mui/material";
-
+import { useEffect, useState } from "react";
+import { Box, ThemeProvider} from "@mui/material";
 import SideBarNavigator from "./components/SideBarNavigator";
-
+import axios from "axios";
+import theme from "./theme";
 
 export default function Home() {
-    // const [home, setHome] = useState(true); // home page
-    // const [actLobby, setActLobby] = useState(false); // activity lobby page
-    // const [createAct, setCreateAct] = useState(false); // create a activty page
 
     // to avaliable Next.js Fast Reload
     const Map = dynamic(
@@ -21,14 +16,30 @@ export default function Home() {
             loading: () => <p>Loading...</p>,
         });
 
+    const [data, setData] = useState<null | Array>(null);
+
+    useEffect(()=>{
+        axios
+        .get("http://localhost:8080/api/v1/activity/")
+        .then((res) => setData(res.data.data))
+        .catch((err) => console.error(err));
+    },[])
+
+
+
   return (
-    <div>
-        <Box component="div" sx={{width:1, position:"relative"}}>
-            <SideBarNavigator />
-            <Box component="div" sx={{width: 1}}>
-                <Map posix={[13.82152778382708, 100.51345467567444]}/>
-            </Box>
-        </Box>
-    </div>
+    <ThemeProvider theme={theme}>
+        <div>
+            <Box component="div" sx={{width:1, position:"relative"}}>
+                <SideBarNavigator />
+                <Box component="div" sx={{width: 1}}>
+                    <Map 
+                    posix={[13.82152778382708, 100.51345467567444]}
+                    data={data}
+                    />
+                </Box>
+            </Box>  
+        </div>
+    </ThemeProvider>
   );
 }
