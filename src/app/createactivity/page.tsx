@@ -6,18 +6,15 @@ import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import theme from "../theme";
 import dayjs from "dayjs";
 
 import { useRouter, useSearchParams} from 'next/navigation'
 import { useState } from "react";
 import axios from "axios";
+import SideBarNavigator from "../components/SideBarNavigator";
 
 function page() {
-    const theme = createTheme({
-        typography: {
-            fontFamily: 'var(--font-mitr)',
-        },
-    })
 
     const Map = dynamic(
         () => import("@/app/components/MapPin"), {
@@ -49,13 +46,14 @@ function page() {
             const lat:string | null = params.get("lat")
             const lng:string | null = params.get("lng")
             const payload: Object = {
-                creator_id: "868cec95-0a6c-4c97-a2be-d0554e3b5f91",
+                // suksom's user id for testing
+                creator_id: "d7432a53-9621-4e6b-9a98-62d2172bd0fa",
                 // "creator_id": "57af58f8-b2df-4659-99c1-c34035e767c7",
                 title: title,
                 description: description,
                 start_time: startDatetime.toString(),
                 end_time: endDatetime.toString(),
-                max_participants: participation,
+                max_participants: Number(participation),
                 visibility: "public",
                 latitude: Number(lat),
                 longitude: Number(lng),
@@ -123,160 +121,167 @@ function page() {
 
     return (
         <ThemeProvider theme={theme}>
-        <div>
-            <Box component="div" 
-            sx={{
-                bgcolor: "lightgrey",
-                minHeight: "100vh",
-                position:"relative", 
-                display:"flex", 
-                justifyContent:"center",
-                // alignItems:"center" 
-            }}>
-                {/* header */}
-                <Box component="div"
-                sx={{
-                    fontFamily: 'var(--font-mitr)',
-                    position: step === 1 ? "absolute" : "fixed",
-                    zIndex:"1000",
-                    textAlign:"center",
-                    fontSize: 20,
-                    backgroundColor: "white",
-                    border: "0.5px solid black",
-                    borderRadius: 3,
-                    p: 1,
-                    m: 2,
-                }}>
-                    {step === 1 && "Mark the Location"}
-                    {step === 2 && "Fill the Information"}
-                </Box>
-
-                {/* MapPin Step: 1*/}
-                {step === 1 &&
-                
-                    <Box component="div" sx={{width: 1}}>
-                        <Map posix={[13.82152778382708, 100.51345467567444]} />
-                    </Box>
-                }
-
-                {/* MapPin Step: 1*/}
-                {step === 2 &&
-                    <Box component="div" 
-                    maxWidth={1000}
-                    sx={{
-                        bgcolor: "white",
-                        boxShadow: "0px 6px 20px rgba(0,0,0,0.08)",
-                        borderRadius: 3,
-                        width: 650,
-                        mt:10,
-                        }}>
-                        <Box component="div" sx={{display: "flex", flexWrap:"wrap", flexDirection:"column"}}>
-                            <Typography align="center" sx={{m:2,fontSize:22}}>
-                                Activity Details
-                            </Typography>
-
-                            <TextField
-                                // required
-                                // id="outlined-required"   
-                                sx={{m:2}}
-                                label="Title"
-                                variant="outlined"
-                                onChange={handleTitle}
-                            />
-                            <TextField
-                                // required
-                                // id="outlined-required"
-                                sx={{m:2}}
-                                label="Location"
-                                variant="outlined"
-                                onChange={handleLocation}
-                            />
-                            <TextField
-                                sx={{m:2}}
-                                id="filled-multiline-static"
-                                label="Description"
-                                multiline
-                                rows={4}
-                                // defaultValue="Default Value"
-                                variant="outlined"
-                                onChange={handleDescription}
-                            />
-                            <TextField
-                                sx={{m:2}}
-                                // aria-label="Demo number input"
-                                label="Participation"
-                                placeholder="Enter a number…"
-                                type="number"
-                                value={participation}
-                                onChange={handleParticipation}
-                                variant="outlined"
-                                InputProps={{ inputProps: { min: 2, max: 20, step: 1 } }} // optional
-                            />
-
-                            <Grid container direction ="row">
-                                <Grid size={6}>
-                                    <Box component={"div"} sx={{m:2}}>
-                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                            <DemoContainer components={['DateTimePicker']}>
-                                                <DateTimePicker label="Start Date & Time" disablePast onChange={handleStartDatetime}/>
-                                            </DemoContainer>
-                                        </LocalizationProvider>
-                                    </Box>
-                                </Grid>
-
-                                <Grid size={6}>
-                                    <Box component={"div"} sx={{m:2}}>
-                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                            <DemoContainer components={['DateTimePicker']}>
-                                                <DateTimePicker label="End Date & Time" disablePast onChange={handleEndDatetime}/>
-                                            </DemoContainer>
-                                        </LocalizationProvider>
-                                    </Box>
-                                </Grid>
-                            </Grid>
-
-                        </Box>
-                    </Box>
-                }
-
-                {/* button bottom */}
+            <SideBarNavigator/>
+            <div>
                 <Box component="div" 
-                maxWidth={250}
                 sx={{
-                    position:"fixed",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    width: 2/3,
-                    height: "svh",
-                    bottom:0,
-                    zIndex:"1000",
-                    textAlign:"center",
-                    // border: "2px solid black",
-                    m: 5
+                    // background: `linear-gradient(225deg,#0B2F9F, ${theme.palette.secondary.main})`,
+                    background: `linear-gradient(45deg,${theme.palette.background.default}, ${theme.palette.primary.main})`,
+                    minHeight: "100vh",
+                    position:"relative", 
+                    display:"flex", 
+                    justifyContent:"center",
+                    // alignItems:"center" 
                 }}>
-                    {/* submit button */}
+                    {/* header */}
+                    <Box component="div"
+                    sx={{
+                        position: step === 1 ? "absolute" : "fixed",
+                        zIndex:"1000",
+                        textAlign:"center",
+                        fontSize: 20,
+                        boxShadow: "10px",
+                        background: theme.palette.background.default,
+                        borderRadius: 3,
+                        p: 1,
+                        m: 2,
+                    }}>
+                        {step === 1 && "Mark the Location"}
+                        {step === 2 && "Fill the Information"}
+                    </Box>
+
+                    {/* MapPin Step: 1*/}
                     {step === 1 &&
-                        <Button variant="contained" 
-                        color={"info"} 
-                        disabled={params.size <= 0} 
-                        onClick={handleStep}
-                        >
-                            Next
-                        </Button>
-                    }
-                    {step === 2 &&
-                        <Button variant="contained" 
-                        color={"success"} 
-                        onClick={handleSubmit}
-                        >
-                            Submit
-                        </Button>
+                    
+                        <Box component="div" sx={{width: 1}}>
+                            <Map posix={[13.82152778382708, 100.51345467567444]} />
+                        </Box>
                     }
 
-                    <Button variant="contained" color="error" onClick={()=>router.push("/")}>Cancel</Button>
+                    {/* MapPin Step: 1*/}
+                    {step === 2 &&
+                        <Box component="div" 
+                        maxWidth={1000}
+                        sx={{
+                            bgcolor: theme.palette.background.paper,
+                            color: theme.palette.text.primary,
+                            background: theme.palette.background.default,
+                            boxShadow: "0px 6px 20px rgba(0,0,0,0.08)",
+                            borderRadius: 3,
+                            width: 650,
+                            mt:10,
+                            pb: 12,
+                            }}>
+                            <Box component="div" sx={{display: "flex", flexWrap:"wrap", flexDirection:"column"}}>
+                                <Typography align="center" sx={{m:2,fontSize:22}}>
+                                    Activity Details
+                                </Typography>
+
+                                <TextField
+                                    // required
+                                    // id="outlined-required"   
+                                    sx={{
+                                        m:2,
+                                    }}
+                                    label="Title"
+                                    variant="outlined"
+                                    onChange={handleTitle}
+                                />
+                        
+                                <TextField
+                                    // required
+                                    // id="outlined-required"
+                                    sx={{m:2}}
+                                    label="Location"
+                                    variant="outlined"
+                                    onChange={handleLocation}
+                                />
+                                <TextField
+                                    sx={{m:2}}
+                                    id="filled-multiline-static"
+                                    label="Description"
+                                    multiline
+                                    rows={4}
+                                    // defaultValue="Default Value"
+                                    variant="outlined"
+                                    onChange={handleDescription}
+                                />
+                                <TextField
+                                    sx={{m:2}}
+                                    // aria-label="Demo number input"
+                                    label="Participation"
+                                    placeholder="Enter a number…"
+                                    type="number"
+                                    value={participation}
+                                    onChange={handleParticipation}
+                                    variant="outlined"
+                                    InputProps={{ inputProps: { min: 2, max: 20, step: 1 } }} // optional
+                                />
+
+                                <Grid container direction ="row">
+                                    <Grid size={6}>
+                                        <Box component={"div"} sx={{m:2}}>
+                                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                <DemoContainer components={['DateTimePicker']}>
+                                                    <DateTimePicker label="Start Date & Time" disablePast onChange={handleStartDatetime}/>
+                                                </DemoContainer>
+                                            </LocalizationProvider>
+                                        </Box>
+                                    </Grid>
+
+                                    <Grid size={6}>
+                                        <Box component={"div"} sx={{m:2}}>
+                                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                <DemoContainer components={['DateTimePicker']}>
+                                                    <DateTimePicker label="End Date & Time" disablePast onChange={handleEndDatetime}/>
+                                                </DemoContainer>
+                                            </LocalizationProvider>
+                                        </Box>
+                                    </Grid>
+                                </Grid>
+
+                            </Box>
+                        </Box>
+                    }
+
+                    {/* button bottom */}
+                    <Box component="div" 
+                    maxWidth={250}
+                    sx={{
+                        position:"fixed",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        width: 2/3,
+                        height: "svh",
+                        bottom:0,
+                        zIndex:"1000",
+                        textAlign:"center",
+                        // border: "2px solid black",
+                        m: 5
+                    }}>
+                        {/* submit button */}
+                        {step === 1 &&
+                            <Button variant="contained" 
+                            color={"info"} 
+                            disabled={params.size <= 0} 
+                            onClick={handleStep}
+                            >
+                                Next
+                            </Button>
+                        }
+                        {step === 2 &&
+                            <Button variant="contained" 
+                            color={"success"} 
+                            onClick={handleSubmit}
+                            >
+                                Submit
+                            </Button>
+                        }
+
+                        <Button variant="contained" color="error" onClick={()=>router.push("/")}>Cancel</Button>
+                    </Box>
                 </Box>
-            </Box>
-        </div>
+            </div>
         </ThemeProvider>
     )
 }
