@@ -10,6 +10,7 @@ interface User {
   PasswordHash: string;
   DisplayName: string;
   AvatarURL: string;
+  AvatarData: string; // Base64 encoded image data
   Bio: string;
   CreatedAt: string;
   UpdatedAt: string;
@@ -174,7 +175,6 @@ const styles = `
   flex-direction: column;
 }
 
-.refresh-button,
 .retry-button,
 .edit-button,
 .save-button,
@@ -190,11 +190,6 @@ const styles = `
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
-}
-
-.refresh-button {
-  background: linear-gradient(45deg, #10b981, #059669);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .edit-button {
@@ -217,11 +212,10 @@ const styles = `
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
-.refresh-button::before,
-.retry-button::before,
 .edit-button::before,
 .save-button::before,
-.cancel-button::before {
+.cancel-button::before,
+.retry-button::before {
   content: '';
   position: absolute;
   top: 0;
@@ -232,29 +226,52 @@ const styles = `
   transition: left 0.5s;
 }
 
-.refresh-button:hover::before,
-.retry-button:hover::before,
 .edit-button:hover::before,
 .save-button:hover::before,
-.cancel-button:hover::before {
+.cancel-button:hover::before,
+.retry-button:hover::before {
   left: 100%;
 }
 
-.refresh-button:hover,
-.retry-button:hover,
 .edit-button:hover,
 .save-button:hover,
-.cancel-button:hover {
+.cancel-button:hover,
+.retry-button:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
 }
 
-.refresh-button:active,
-.retry-button:active,
 .edit-button:active,
 .save-button:active,
-.cancel-button:active {
+.cancel-button:active,
+.retry-button:active {
   transform: translateY(0);
+}
+
+/* Image Upload Button */
+.image-upload-button {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: none;
+  border-radius: 15px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: auto;
+}
+
+.image-upload-button:hover {
+  background: rgba(0, 0, 0, 0.9);
+  transform: scale(1.05);
+}
+
+.image-upload-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* Form Styles */
@@ -488,6 +505,11 @@ const styles = `
   .form-actions {
     flex-direction: column;
   }
+  
+  .image-upload-button {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.7rem;
+  }
 }
 `;
 
@@ -512,6 +534,8 @@ const UserProfile: React.FC = () => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -524,6 +548,94 @@ const UserProfile: React.FC = () => {
   useEffect(() => {
     fetchUserProfile();
   }, []);
+
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!user) return;
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setError('Please select a valid image file');
+      return;
+    }
+
+    // Validate file size (e.g., 5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Image size should be less than 5MB');
+      return;
+    }
+
+    try {
+      setUploading(true);
+      setError(null);
+
+      console.log("Uploading image for email:", user.Email);
+      console.log("File details:", {
+        name: file.name,
+        type: file.type,
+        size: file.size
+      });
+
+      // Use FormData with both image file and email
+      const formData = new FormData();
+      formData.append('image', file); // File field
+      formData.append('email', user.Email); // Email field
+
+      // Log FormData contents for debugging
+      for (let [key, value] of formData.entries()) {
+        console.log(`FormData: ${key} =`, value);
+      }
+
+      const response = await fetch('http://localhost:8000/api/v1/user/UpdateAvartarData', {
+        method: 'PUT',
+        credentials: 'include',
+        body: formData, // Don't set Content-Type header, let browser set it with boundary
+      });
+
+      console.log("Response status:", response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("API Error Response:", errorText);
+        throw new Error(`Upload failed: ${response.status} - ${errorText}`);
+      }
+
+      const responseData = await response.json();
+      console.log("Upload response:", responseData);
+      
+      // Update local state with the new avatar data
+      if (responseData.avatar_data || responseData.AvatarData) {
+        const newAvatarData = responseData.avatar_data || responseData.AvatarData;
+        setUser(prev => prev ? { ...prev, AvatarData: newAvatarData } : prev);
+        setSuccessMessage('Profile image updated successfully!');
+        setTimeout(() => setSuccessMessage(null), 3000);
+      } else if (responseData.user) {
+        // If response has full user object
+        setUser(responseData.user);
+        setSuccessMessage('Profile image updated successfully!');
+        setTimeout(() => setSuccessMessage(null), 3000);
+      } else {
+        // If API doesn't return the data, refetch the user profile
+        await fetchUserProfile();
+        setSuccessMessage('Profile image updated successfully!');
+        setTimeout(() => setSuccessMessage(null), 3000);
+      }
+    } catch (err) {
+      console.error('Image upload error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to upload image');
+    } finally {
+      setUploading(false);
+      // Clear the file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
 
   const fetchUserProfile = async (): Promise<void> => {
     try {
@@ -628,7 +740,6 @@ const UserProfile: React.FC = () => {
       });
 
       console.log("Response status:", response.status);
-      console.log("Response headers:", Object.fromEntries(response.headers.entries()));
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -675,8 +786,16 @@ const UserProfile: React.FC = () => {
     }));
   };
 
-  const getImageSrc = (avatarURL: string): string => {
-    return avatarURL && avatarURL.trim() !== '' ? avatarURL : '/BALDING.png';
+  const getImageSrc = (avatarData: string): string => {
+    if (avatarData && avatarData.trim() !== '') {
+      // Check if it already has data URL prefix
+      if (avatarData.startsWith('data:image/')) {
+        return avatarData;
+      }
+      // Assume it's base64 data and add the prefix
+      return `data:image/jpeg;base64,${avatarData}`;
+    }
+    return '/BALDING.png';
   };
 
   const formatSex = (sex: string): string => {
@@ -740,7 +859,7 @@ const UserProfile: React.FC = () => {
         <div className="profile-header">
           <div className="profile-image-container">
             <img
-              src={getImageSrc(user.AvatarURL)}
+              src={getImageSrc(user.AvatarData)}
               alt={`${user.DisplayName}'s profile`}
               className="profile-image"
               onError={(e) => {
@@ -748,6 +867,21 @@ const UserProfile: React.FC = () => {
                 target.src = '/BALDING.png';
               }}
             />
+            {/* Hidden file input */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleImageChange}
+              accept="image/*"
+              style={{ display: 'none' }}
+            />
+            <button
+              className="image-upload-button"
+              onClick={handleImageClick}
+              disabled={uploading}
+            >
+              {uploading ? '📤 Uploading...' : '📷 Change'}
+            </button>
           </div>
           <h1 className="profile-name">{user.DisplayName}</h1>
           <p className="profile-bio">{formatBio(user.Bio)}</p>
@@ -872,11 +1006,9 @@ const UserProfile: React.FC = () => {
 
         <div className="profile-actions">
           {!isEditing ? (
-            <>
-              <button onClick={handleEdit} className="edit-button">
-                ✏️ Edit Profile
-              </button>
-            </>
+            <button onClick={handleEdit} className="edit-button">
+              ✏️ Edit Profile
+            </button>
           ) : null}
         </div>
       </div>
