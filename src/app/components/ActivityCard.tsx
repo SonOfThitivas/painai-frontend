@@ -1,11 +1,28 @@
 "use client"
 
 import React, { useState } from "react";
-import { Card, CardContent, Avatar, Typography, CardActions, Button, CardHeader, Stack, Box, ThemeProvider } from "@mui/material";
+import { Card, 
+    CardContent, 
+    Avatar, 
+    Typography, 
+    CardActions, 
+    Button, 
+    CardHeader, 
+    Stack, 
+    Box, 
+    ThemeProvider,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+} from "@mui/material";
 import EventIcon from '@mui/icons-material/CalendarMonthOutlined';
 import PlaceIcon from '@mui/icons-material/FmdGood';
 import { red } from '@mui/material/colors';
 import theme from "./theme";
+import { useRouter } from "next/navigation";
+import axios from "axios";
 
 interface ActivityCardProps {
   title?: string;
@@ -16,7 +33,11 @@ interface ActivityCardProps {
   avatarUrl?: string;
   images?: string[];
   maxParticipants?: number;
-  participants: number;
+  participants?: number;
+  isAuth?: boolean;
+  members?: Array<any>;
+  userID?: string;
+  activityID?: string;
 }
 
 export default function ActivityCard({
@@ -29,9 +50,15 @@ export default function ActivityCard({
   avatarUrl = "null",
   maxParticipants = 0,
   participants = 0,
+  isAuth = false,
+  members = [],
+  userID = "",
+  activityID = "",
 }: ActivityCardProps) {
 
-  const [showFullText, setShowFullText] = useState(false);
+  const [showFullText, setShowFullText] = useState<boolean>(false);
+  const [openAuth, setOpenAuth] = useState<boolean>(false);
+  const router = useRouter()
 
   // grid column layout based on number of images
   const getGridColumns = (num: number) => {
@@ -40,6 +67,38 @@ export default function ActivityCard({
     if (num === 3) return "1fr 1fr";
     return "1fr 1fr"; // 4+ images → 2x2 grid
   };
+
+    const handleJoin = async () => {
+        if (isAuth){
+            if (participants < maxParticipants){
+                const body = {
+                    "activity_id": activityID,
+                    "user_id": userID
+                }
+                const res:any = await axios.post("http://localhost:8000/api/v1/activity/join", body)
+                
+                router.refresh()
+            } else {
+                // TODO: handle outbound 
+            }
+
+        } else {
+            setOpenAuth(true)
+        }
+    }
+
+    const handleCancel = async () => {
+        if (isAuth){
+            // TODO: wait API cancel join
+        } else {
+            setOpenAuth(true)
+        }
+    }
+
+    const handleCloseAuth = () => {
+        setOpenAuth(false);
+        router.push("/login")
+    };
 
   return (
     <ThemeProvider theme={theme}>
@@ -126,13 +185,63 @@ export default function ActivityCard({
 
         <CardActions sx={{width:1, display:"flex", flexDirection:"column", alignItems:"end"}}>
             <Box component={"div"}>
-                <Button variant="contained" color="success" sx={{m:1}}>Join</Button>
-                <Button variant="contained" color="error"  sx={{m:1}}>Cancel</Button>
+                <Button variant="contained" color="success" sx={{m:1}} 
+                onClick={handleJoin} disabled={members.includes(userID) ? true : false}>
+                    Join
+                </Button>
+                <Button variant="contained" color="error"  sx={{m:1}} 
+                onClick={handleCancel} disabled={members.includes(userID) ? false : true}>
+                    Cancel
+                </Button>
             </Box>
             <Typography variant="h6" sx={{m:1}}>{participants} / {maxParticipants} joined</Typography>
         </CardActions>
 
         </Card>
+        
+        {/* Alert if you are not authenticated */}
+        <Dialog
+            open={openAuth}
+            onClose={handleCloseAuth}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+        >
+            <DialogTitle id="alert-dialog-title">
+            {"You haven't authenticated yet."}
+            </DialogTitle>
+            <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+                Please, sign in.
+            </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+            <Button onClick={handleCloseAuth} autoFocus>
+                OK
+            </Button>
+            </DialogActions>
+        </Dialog>
+
+        <Dialog
+            open={openAuth}
+            onClose={handleCloseAuth}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+        >
+            <DialogTitle id="alert-dialog-title">
+            {"You haven't authenticated yet."}
+            </DialogTitle>
+            <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+                Please, sign in.
+            </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+            <Button onClick={handleCloseAuth} autoFocus>
+                OK
+            </Button>
+            </DialogActions>
+        </Dialog>
+
     </ThemeProvider>
   );
 }

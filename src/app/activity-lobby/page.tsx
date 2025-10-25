@@ -11,7 +11,30 @@ import theme from '../components/theme';
 export default function ActivityLobby() {
 
     const [data, setData] = React.useState<null | Array<any>>([]);
-    const [username, setUsername] = React.useState<null | Array<any>>([]);
+    const [isAuth, setIsAuth] = React.useState<boolean>(false);
+    const [userID, setUserID] = React.useState<string>("");
+
+    // fetch browsing user ID
+    const fetchUserID = async () => {
+        const res:any = await axios.get(`http://localhost:8000/api/v1/auth/auth/callback`, {withCredentials:true,})
+        .then((res)=>{
+            setIsAuth(true)
+            return res
+
+        })
+        .catch((err)=>{
+            setIsAuth(false)
+            return err
+        })
+
+        try {
+            const email = res.data.user.email
+            const resUser:any = await axios.get(`http://localhost:8000/api/v1/user/email/${email}`)
+            return resUser.data.ID
+        } catch (err) {
+            return ""
+        }
+    }
 
     // fetch username from creator id
     const fetchUser = async (userID:String) => {
@@ -19,11 +42,15 @@ export default function ActivityLobby() {
         return res.data.data.DisplayName
     } 
 
+    // fetch number of activiy member
     const fetchMember = async (activityID:String) => {
         const res:any = await axios.get(`http://localhost:8000/api/v1/activity/${activityID}/members`).catch((err)=>alert(err))
         const data:Array<any> = res.data
-        return data.length
-    } 
+        return {
+            "count": data.length,
+            "data" : data
+        }
+    }
 
     // fetch activity + username
     const fetchData = async () => {
@@ -45,12 +72,15 @@ export default function ActivityLobby() {
         
         for (const [index, item] of fData.entries()){
             const username = await fetchUser(item.CreatorID)
-            const participants = await fetchMember(item.ID)
+            const member = await fetchMember(item.ID)
             fData[index].username = username
-            fData[index].participants = participants
+            fData[index].participants = member.count
+            // fData[index].member = member.data
+            fData[index].members = member.data.map((data)=>(data.user_id))
+            // console.log(fData[index].member)
         }
-
-        // console.log(fData)
+        
+        setUserID(await fetchUserID())
         setData(fData)
     }
 
@@ -58,7 +88,6 @@ export default function ActivityLobby() {
     React.useEffect(() => {
         fetchData()
     },[])
-
     
   return (
       <ThemeProvider theme={theme}>
@@ -70,7 +99,7 @@ export default function ActivityLobby() {
             flexGrow: 1, p: 3, 
             justifyItems: 'center',
             minHeight: '100vh', 
-            backgroundColor: theme.palette.secondary.main 
+            background: `linear-gradient(45deg,${theme.palette.background.default}, ${theme.palette.primary.main})`
             }}>
             
             <Typography variant="h4" gutterBottom>
@@ -89,6 +118,10 @@ export default function ActivityLobby() {
                         description={act.Description}
                         maxParticipants={act.MaxParticipants}
                         participants={act.participants}
+                        isAuth={isAuth}
+                        members={act.members}
+                        userID={userID}
+                        activityID={act.ID}
                         >
                     </ActivityCard>)
                     })
