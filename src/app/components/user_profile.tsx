@@ -5,34 +5,33 @@ import React, { useState, useEffect } from 'react';
 
 // Interfaces
 interface User {
-  data: {
-    ID: number;
-    Username: string;
-    Name: string;
-    Sex: string;
-    Age: number;
-    HashPass: string;
-    Email: string;
-    ImagePath: string;
-  }
+  ID: string;
+  Email: string;
+  PasswordHash: string;
+  DisplayName: string;
+  AvatarURL: string;
+  Bio: string;
+  CreatedAt: string;
+  UpdatedAt: string;
+  Sex: string;
+  Age: number;
 }
 
 interface AuthResponse {
   user: {
     email: string;
     name: string;
-  }
+  };
 }
 
 // CSS styles as a template literal
 const styles = `
 .user-profile {
-  max-width: 480px;
+  max-width: 440px;
   margin: 2rem auto;
-  padding: 2rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 24px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: white;
   position: relative;
@@ -45,14 +44,14 @@ const styles = `
   top: 0;
   left: 0;
   right: 0;
-  height: 120px;
+  height: 100px;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 24px 24px 0 0;
+  border-radius: 20px 20px 0 0;
 }
 
 .profile-header {
   text-align: center;
-  margin-bottom: 2.5rem;
+  padding: 2rem 2rem 1.5rem;
   position: relative;
   z-index: 2;
 }
@@ -64,23 +63,23 @@ const styles = `
 }
 
 .profile-image {
-  width: 140px;
-  height: 140px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
   object-fit: cover;
-  border: 6px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
   background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
   transition: all 0.3s ease;
 }
 
 .profile-image:hover {
   transform: scale(1.05);
-  border-color: rgba(255, 255, 255, 0.4);
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 .profile-name {
-  font-size: 2rem;
+  font-size: 1.8rem;
   font-weight: 700;
   margin: 0 0 0.5rem 0;
   background: linear-gradient(45deg, #fff, #e0e7ff);
@@ -89,19 +88,20 @@ const styles = `
   background-clip: text;
 }
 
-.profile-username {
-  font-size: 1.1rem;
+.profile-bio {
+  font-size: 1rem;
   color: rgba(255, 255, 255, 0.8);
   margin: 0;
-  font-weight: 500;
+  line-height: 1.5;
+  font-style: italic;
 }
 
 .profile-details {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   border-radius: 16px;
+  margin: 0 1.5rem 1.5rem;
   padding: 1.5rem;
-  margin-bottom: 2rem;
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
@@ -109,7 +109,7 @@ const styles = `
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 0;
+  padding: 0.75rem 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.2s ease;
 }
@@ -117,7 +117,7 @@ const styles = `
 .detail-item:hover {
   background: rgba(255, 255, 255, 0.05);
   border-radius: 8px;
-  padding: 1rem;
+  padding: 0.75rem 0.5rem;
   margin: 0 -0.5rem;
 }
 
@@ -147,11 +147,40 @@ const styles = `
   text-align: right;
 }
 
+.sex-badge {
+  background: rgba(139, 92, 246, 0.3);
+  color: white;
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: 1px solid rgba(139, 92, 246, 0.5);
+}
+
+.age-badge {
+  background: rgba(16, 185, 129, 0.3);
+  color: white;
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: 1px solid rgba(16, 185, 129, 0.5);
+}
+
+.profile-actions {
+  padding: 0 1.5rem 1.5rem;
+  display: flex;
+  gap: 1rem;
+  flex-direction: column;
+}
+
 .refresh-button,
-.retry-button {
+.retry-button,
+.edit-button,
+.save-button,
+.cancel-button {
   width: 100%;
   padding: 1rem 2rem;
-  background: linear-gradient(45deg, #10b981, #059669);
   color: white;
   border: none;
   border-radius: 12px;
@@ -159,13 +188,40 @@ const styles = `
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
   position: relative;
   overflow: hidden;
 }
 
+.refresh-button {
+  background: linear-gradient(45deg, #10b981, #059669);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.edit-button {
+  background: linear-gradient(45deg, #3b82f6, #1d4ed8);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.save-button {
+  background: linear-gradient(45deg, #10b981, #059669);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.cancel-button {
+  background: linear-gradient(45deg, #6b7280, #4b5563);
+  box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+}
+
+.retry-button {
+  background: linear-gradient(45deg, #ef4444, #dc2626);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
 .refresh-button::before,
-.retry-button::before {
+.retry-button::before,
+.edit-button::before,
+.save-button::before,
+.cancel-button::before {
   content: '';
   position: absolute;
   top: 0;
@@ -177,31 +233,105 @@ const styles = `
 }
 
 .refresh-button:hover::before,
-.retry-button:hover::before {
+.retry-button:hover::before,
+.edit-button:hover::before,
+.save-button:hover::before,
+.cancel-button:hover::before {
   left: 100%;
 }
 
 .refresh-button:hover,
-.retry-button:hover {
+.retry-button:hover,
+.edit-button:hover,
+.save-button:hover,
+.cancel-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
 }
 
 .refresh-button:active,
-.retry-button:active {
+.retry-button:active,
+.edit-button:active,
+.save-button:active,
+.cancel-button:active {
   transform: translateY(0);
 }
 
+/* Form Styles */
+.edit-form {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  margin: 0 1.5rem 1.5rem;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.form-input,
+.form-textarea,
+.form-select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.form-actions button {
+  flex: 1;
+}
+
+/* Loading State */
 .user-profile.loading {
   text-align: center;
   padding: 4rem 2rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 24px;
+  border-radius: 20px;
 }
 
 .spinner {
-  width: 60px;
-  height: 60px;
+  width: 50px;
+  height: 50px;
   border: 4px solid rgba(255, 255, 255, 0.3);
   border-top: 4px solid white;
   border-radius: 50%;
@@ -216,11 +346,12 @@ const styles = `
   margin: 0;
 }
 
+/* Error State */
 .user-profile.error {
   text-align: center;
   padding: 3rem 2rem;
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  border-radius: 24px;
+  border-radius: 20px;
 }
 
 .user-profile.error h2 {
@@ -235,26 +366,27 @@ const styles = `
   font-size: 1rem;
 }
 
-.retry-button {
-  background: linear-gradient(45deg, #ef4444, #dc2626);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-}
-
-.retry-button:hover {
-  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
-}
-
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
 
-/* Stats section */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+.profile-image {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Stats Section */
 .profile-stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr 1fr;
   gap: 1rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
+  padding: 0 1.5rem;
 }
 
 .stat-item {
@@ -263,10 +395,16 @@ const styles = `
   background: rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .stat-value {
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   font-weight: 700;
   color: white;
   display: block;
@@ -276,59 +414,65 @@ const styles = `
   font-size: 0.875rem;
   color: rgba(255, 255, 255, 0.7);
   margin-top: 0.25rem;
+  font-weight: 500;
 }
 
-/* Badge for sex */
-.sex-badge {
-  background: rgba(139, 92, 246, 0.2);
+/* Success Message */
+.success-message {
+  background: rgba(16, 185, 129, 0.3);
+  border: 1px solid rgba(16, 185, 129, 0.5);
   color: white;
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  border: 1px solid rgba(139, 92, 246, 0.4);
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 1rem 1.5rem;
+  text-align: center;
+  animation: slideIn 0.3s ease-out;
 }
 
-/* Email with copy functionality */
-.email-container {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.copy-button {
-  background: none;
-  border: none;
-  color: rgba(255, 255, 255, 0.7);
-  cursor: pointer;
-  padding: 0.25rem;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-}
-
-.copy-button:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-}
-
+/* Responsive Design */
 @media (max-width: 480px) {
   .user-profile {
     margin: 1rem;
-    padding: 1.5rem;
+    border-radius: 16px;
+  }
+  
+  .profile-header {
+    padding: 1.5rem 1rem 1rem;
   }
   
   .profile-image {
-    width: 120px;
-    height: 120px;
+    width: 100px;
+    height: 100px;
   }
   
   .profile-name {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
+  }
+  
+  .profile-details {
+    margin: 0 1rem 1rem;
+    padding: 1rem;
   }
   
   .profile-stats {
+    padding: 0 1rem;
     grid-template-columns: 1fr;
     gap: 0.75rem;
+  }
+  
+  .profile-actions {
+    padding: 0 1rem 1rem;
   }
   
   .detail-item {
@@ -340,16 +484,10 @@ const styles = `
   .detail-value {
     text-align: left;
   }
-}
-
-/* Floating animation */
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-}
-
-.profile-image {
-  animation: float 6s ease-in-out infinite;
+  
+  .form-actions {
+    flex-direction: column;
+  }
 }
 `;
 
@@ -371,7 +509,17 @@ const UserProfile: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [copied, setCopied] = useState<boolean>(false);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [saving, setSaving] = useState<boolean>(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  
+  // Form state
+  const [formData, setFormData] = useState({
+    displayName: '',
+    bio: '',
+    sex: '',
+    age: ''
+  });
 
   useEffect(() => {
     fetchUserProfile();
@@ -382,7 +530,8 @@ const UserProfile: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      const authResponse = await fetch('http://localhost:8000/v1/api/auth/auth/callback', {
+      // Step 1: Fetch email from auth API
+      const authResponse = await fetch('http://localhost:8000/api/v1/auth/auth/callback', {
         method: 'GET',
         credentials: 'include',
         headers: {
@@ -395,13 +544,14 @@ const UserProfile: React.FC = () => {
       }
 
       const authData: AuthResponse = await authResponse.json();
-      const userEmail = authData.user.email;
+      const userEmail = authData.user?.email;
 
       if (!userEmail) {
         throw new Error('No email found in auth response');
       }
 
-      const userResponse = await fetch(`http://localhost:8000/v1/api/user/email/${encodeURIComponent(userEmail)}`, {
+      // Step 2: Fetch user details using the email
+      const userResponse = await fetch(`http://localhost:8000/api/v1/user/email/${encodeURIComponent(userEmail)}`, {
         method: 'GET',
         credentials: 'include',
         headers: {
@@ -415,6 +565,15 @@ const UserProfile: React.FC = () => {
 
       const userData: User = await userResponse.json();
       setUser(userData);
+      
+      // Initialize form data
+      setFormData({
+        displayName: userData.DisplayName || '',
+        bio: userData.Bio || '',
+        sex: userData.Sex || '',
+        age: userData.Age?.toString() || ''
+      });
+
     } catch (err) {
       console.error('Error fetching user profile:', err);
       setError(err instanceof Error ? err.message : 'An unknown error occurred');
@@ -423,19 +582,113 @@ const UserProfile: React.FC = () => {
     }
   };
 
-  const getImageSrc = (imagePath: string): string => {
-    return imagePath && imagePath.trim() !== '' ? imagePath : '/BALDING.png';
+  const handleEdit = () => {
+    setIsEditing(true);
+    setSuccessMessage(null);
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    // Reset form data to current user data
+    if (user) {
+      setFormData({
+        displayName: user.DisplayName || '',
+        bio: user.Bio || '',
+        sex: user.Sex || '',
+        age: user.Age?.toString() || ''
+      });
+    }
+    setSuccessMessage(null);
+  };
+
+  const handleSave = async () => {
+    if (!user) return;
+
+    try {
+      setSaving(true);
+      setError(null);
+
+      const updateData = {
+        email: user.Email,
+        display_name: formData.displayName || null,
+        bio: formData.bio || null,
+        sex: formData.sex || null,
+        age: formData.age ? parseInt(formData.age) : null
+      };
+      
+      console.log("Sending update data:", updateData);
+
+      const response = await fetch('http://localhost:8000/api/v1/user/profile', {
+        method: 'PUT',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updateData),
+      });
+
+      console.log("Response status:", response.status);
+      console.log("Response headers:", Object.fromEntries(response.headers.entries()));
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("API Error Response:", errorText);
+        throw new Error(`Update failed: ${response.status} - ${errorText}`);
+      }
+
+      const responseData = await response.json();
+      console.log("Full API response:", responseData);
+      
+      // Check what structure we're getting back
+      if (responseData.user) {
+        // If response has nested user object
+        setUser(responseData.user);
+      } else if (responseData.ID || responseData.id) {
+        // If response is the user object directly
+        setUser(responseData);
+      } else {
+        console.warn("Unexpected response structure:", responseData);
+        // If API doesn't return user data, refetch it
+        await fetchUserProfile();
+      }
+      
+      setIsEditing(false);
+      setSuccessMessage('Profile updated successfully!');
+      
+      setTimeout(() => {
+        setSuccessMessage(null);
+      }, 3000);
+
+    } catch (err) {
+      console.error('Error updating profile:', err);
+      setError(err instanceof Error ? err.message : 'Failed to update profile');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const getImageSrc = (avatarURL: string): string => {
+    return avatarURL && avatarURL.trim() !== '' ? avatarURL : '/BALDING.png';
   };
 
   const formatSex = (sex: string): string => {
+    if (!sex) return 'Not specified';
     return sex.charAt(0).toUpperCase() + sex.slice(1);
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
+  const formatBio = (bio: string): string => {
+    if (!bio || bio === 'Text your bio here.') {
+      return 'No bio yet. Share something about yourself!';
+    }
+    return bio;
   };
 
   if (loading) {
@@ -450,7 +703,7 @@ const UserProfile: React.FC = () => {
     );
   }
 
-  if (error) {
+  if (error && !user) {
     return (
       <>
         <StyleInjector />
@@ -487,8 +740,8 @@ const UserProfile: React.FC = () => {
         <div className="profile-header">
           <div className="profile-image-container">
             <img
-              src={getImageSrc(user.data.ImagePath)}
-              alt={`${user.data.Name}'s profile`}
+              src={getImageSrc(user.AvatarURL)}
+              alt={`${user.DisplayName}'s profile`}
               className="profile-image"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
@@ -496,54 +749,136 @@ const UserProfile: React.FC = () => {
               }}
             />
           </div>
-          <h1 className="profile-name">{user.data.Name}</h1>
-          <p className="profile-username">@{user.data.Username}</p>
+          <h1 className="profile-name">{user.DisplayName}</h1>
+          <p className="profile-bio">{formatBio(user.Bio)}</p>
         </div>
 
-        <div className="profile-stats">
-          <div className="stat-item">
-            <span className="stat-value">{user.data.Age}</span>
-            <span className="stat-label">Age</span>
+        {successMessage && (
+          <div className="success-message">
+            {successMessage}
           </div>
-          <div className="stat-item">
-            <span className="stat-value">{user.data.ID}</span>
-            <span className="stat-label">ID</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-value sex-badge">{formatSex(user.data.Sex)}</span>
-            <span className="stat-label">Gender</span>
-          </div>
-        </div>
+        )}
 
-        <div className="profile-details">
-          <div className="detail-item">
-            <span className="detail-label">Email Address</span>
-            <div className="email-container">
-              <span className="detail-value">{user.data.Email}</span>
-              <button 
-                className="copy-button"
-                onClick={() => copyToClipboard(user.data.Email)}
-                title="Copy email"
+        {error && (
+          <div className="user-profile error" style={{ margin: '1rem 1.5rem', padding: '1rem' }}>
+            <p>{error}</p>
+          </div>
+        )}
+
+        {isEditing ? (
+          <div className="edit-form">
+            <div className="form-group">
+              <label className="form-label">Display Name</label>
+              <input
+                type="text"
+                name="displayName"
+                value={formData.displayName}
+                onChange={handleInputChange}
+                className="form-input"
+                placeholder="Enter your display name"
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Bio</label>
+              <textarea
+                name="bio"
+                value={formData.bio}
+                onChange={handleInputChange}
+                className="form-textarea"
+                placeholder="Tell us something about yourself..."
+                rows={3}
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Gender</label>
+              <select
+                name="sex"
+                value={formData.sex}
+                onChange={handleInputChange}
+                className="form-select"
               >
-                {copied ? '✓' : '📋'}
+                <option value="">Select gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+                <option value="prefer-not-to-say">Prefer not to say</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Age</label>
+              <input
+                type="number"
+                name="age"
+                value={formData.age}
+                onChange={handleInputChange}
+                className="form-input"
+                placeholder="Enter your age"
+                min="1"
+                max="120"
+              />
+            </div>
+
+            <div className="form-actions">
+              <button 
+                onClick={handleSave} 
+                className="save-button"
+                disabled={saving}
+              >
+                {saving ? 'Saving...' : '💾 Save Changes'}
+              </button>
+              <button 
+                onClick={handleCancel} 
+                className="cancel-button"
+                disabled={saving}
+              >
+                ❌ Cancel
               </button>
             </div>
           </div>
-          
-          <div className="detail-item">
-            <span className="detail-label">Username</span>
-            <span className="detail-value">@{user.data.Username}</span>
-          </div>
-          
-          <div className="detail-item">
-            <span className="detail-label">Full Name</span>
-            <span className="detail-value">{user.data.Name}</span>
-          </div>
-        </div>
+        ) : (
+          <>
+            <div className="profile-stats">
+              <div className="stat-item">
+                <span className="stat-value">{user.Age}</span>
+                <span className="stat-label">Age</span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-value sex-badge">{formatSex(user.Sex)}</span>
+                <span className="stat-label">Gender</span>
+              </div>
+            </div>
 
-        <button onClick={fetchUserProfile} className="refresh-button">
-          🔄 Refresh Profile
-        </button>
+            <div className="profile-details">
+              <div className="detail-item">
+                <span className="detail-label">Display Name</span>
+                <span className="detail-value">{user.DisplayName}</span>
+              </div>
+              
+              <div className="detail-item">
+                <span className="detail-label">Gender</span>
+                <span className="detail-value sex-badge">{formatSex(user.Sex)}</span>
+              </div>
+              
+              <div className="detail-item">
+                <span className="detail-label">Age</span>
+                <span className="detail-value age-badge">{user.Age} years old</span>
+              </div>
+            </div>
+          </>
+        )}
+
+        <div className="profile-actions">
+          {!isEditing ? (
+            <>
+              <button onClick={handleEdit} className="edit-button">
+                ✏️ Edit Profile
+              </button>
+            </>
+          ) : null}
+        </div>
       </div>
     </>
   );
