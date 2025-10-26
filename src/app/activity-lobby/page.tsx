@@ -7,31 +7,37 @@ import ActivityCard from "../components/ActivityCard";
 import axios from 'axios';
 import dayjs from 'dayjs';
 import theme from '../components/theme';
+import SearchBox from '../components/SearchBox';
 
 export default function ActivityLobby() {
 
     const [data, setData] = React.useState<null | Array<any>>([]);
     const [isAuth, setIsAuth] = React.useState<boolean>(false);
     const [userID, setUserID] = React.useState<string>("");
+    const [title, setTitle] = React.useState<string>("");
+    const [dataAct, setDataAct] = React.useState<Array<any>>([])
 
     // fetch browsing user ID
     const fetchUserID = async () => {
+        // check session
+        let isSession: boolean = false;
         const res:any = await axios.get(`http://localhost:8000/api/v1/auth/auth/callback`, {withCredentials:true,})
         .then((res)=>{
+            isSession = true
             setIsAuth(true)
             return res
-
         })
         .catch((err)=>{
             setIsAuth(false)
             return err
         })
 
-        try {
+        // find user id by email
+        if (isSession) {
             const email = res.data.user.email
             const resUser:any = await axios.get(`http://localhost:8000/api/v1/user/email/${email}`)
             return resUser.data.ID
-        } catch (err) {
+        } else {
             return ""
         }
     }
@@ -84,10 +90,26 @@ export default function ActivityLobby() {
         setData(fData)
     }
 
+    const fetchFilterData = () => {
+        let filtAct = data.filter((item)=>{
+            let text = item.Title
+            text = text.toLowerCase()
+            return text.match(title.toLowerCase())
+        })
+        setDataAct(filtAct)
+        // console.log(data)
+        // console.log(filtAct)
+    }
 
+    // fetch dat at first
     React.useEffect(() => {
         fetchData()
     },[])
+
+    // call dunction when data and title are changed
+    React.useEffect(() => {
+        fetchFilterData()
+    },[title,data])
     
   return (
       <ThemeProvider theme={theme}>
@@ -101,14 +123,14 @@ export default function ActivityLobby() {
             minHeight: '100vh', 
             background: `linear-gradient(45deg,${theme.palette.background.default}, ${theme.palette.primary.main})`
             }}>
-            
             <Typography variant="h4" gutterBottom>
                 Activity Lobby
             </Typography>
+            <SearchBox label={"Search Activities"} position={"static"} setTitle={setTitle} data={data}/>
 
             <Grid container spacing={2} direction="column">
                 {   // display all activities, ordering by decreasing date
-                    data.map((act:any) => {
+                    dataAct.map((act:any) => {
                     return (<ActivityCard
                         key={act.ID}
                         username={act.username}
