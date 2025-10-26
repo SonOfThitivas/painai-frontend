@@ -9,6 +9,10 @@ import axios from "axios";
 import theme from "./components/theme";
 
 
+import theme from "./components/theme";
+
+import {ThemeProvider} from "@mui/material";
+
 export default function Home() {
 
     // to avaliable Next.js Fast Reload
@@ -34,6 +38,7 @@ export default function Home() {
     },[])
 
   return (
+<<<<<<< HEAD
     <ThemeProvider theme={theme}>
         <Box component="div" sx={{width:1, position:"relative"}}>
             <SideBarNavigator />
@@ -47,5 +52,18 @@ export default function Home() {
             {/* <SearchBox label={"Search Activities"} data={data} title={title} /> */}
         </Box> 
     </ThemeProvider>
+=======
+    <div>
+        <ThemeProvider theme={theme}>
+            <Box component="div" sx={{width:1, position:"relative"}}>
+                <SideBarNavigator />
+                <Box component="div" sx={{width: 1}}>
+                    <Map posix={[13.82152778382708, 100.51345467567444]}/>
+                </Box>
+            </Box>  
+        </ThemeProvider>
+    </div>
+
+>>>>>>> features/user_profile
   );
 }

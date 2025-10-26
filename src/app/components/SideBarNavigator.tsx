@@ -19,6 +19,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
+import Person2RoundedIcon from '@mui/icons-material/Person2Rounded';
 import { Button } from '@mui/material';
 import Link from "next/link";
 import { icon } from 'leaflet';
@@ -114,6 +115,7 @@ export default function SideBarNavigator() {
     { name: 'Home', path: '/' , icon: <HomeRoundedIcon />},
     { name: 'Activity Lobby', path: '/activity-lobby' , icon: <EventNoteRoundedIcon />},
     { name: 'Create an Activity', path: '/createactivity' , icon: <AddRoundedIcon />},
+    { name: 'Profile', path:'/profile',icon: <Person2RoundedIcon />}
   ]
 
   const handleDrawer = () => {
@@ -230,7 +232,7 @@ export default function SideBarNavigator() {
                   >
                     <ListItemButton
                       sx={{
-                        color: theme.palette.secondary.contrastText,    // normal text color
+                        color: theme.palette.primary.contrastText,    // normal text color
                         borderRadius:5,         
                         "&:hover": {
                           backgroundColor: theme.palette.background.paper,     // hover background
