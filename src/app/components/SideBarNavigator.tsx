@@ -115,10 +115,17 @@ export default function SideBarNavigator() {
     { name: 'Activity Lobby', path: '/activity-lobby' , icon: <EventNoteRoundedIcon />},
     { name: 'Create an Activity', path: '/createactivity' , icon: <AddRoundedIcon />},
   ]
-
   const handleDrawer = () => {
     setOpen(!open)
   }
+
+  const handleDrawerOpen = () => {
+    setOpen(true);
+  };
+
+  const handleDrawerClose = () => {
+    setOpen(false);
+  };
 
   return (
     <Box sx={{ display: 'flex'}}>

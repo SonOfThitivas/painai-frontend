@@ -1,7 +1,18 @@
 "use client"
 import dynamic from "next/dynamic";
-import { Box, Button, createTheme, Grid, TextField, ThemeProvider, Typography } from "@mui/material"
-import { ChangeEventHandler } from "react";
+import { Box, 
+    Button, 
+    Grid, 
+    TextField, 
+    ThemeProvider, 
+    Typography,
+    Dialog,
+    DialogActions,
+    DialogTitle,
+    DialogContent,
+    DialogContentText,
+} from "@mui/material"
+import { ChangeEventHandler, useEffect } from "react";
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -34,21 +45,36 @@ function page() {
     const [participation, setParticipation] = useState<number>(5);
     const [startDatetime, setStartDatetime] = useState<Date | null>(null);
     const [endDatetime, setEndDatetime] = useState<Date | null>(null);
-
     const [step, setStep] = useState<number | null>(1)
+    const [userID, setUserID] = useState<string>("")
+    const [openAuth, setOpenAuth] = useState<boolean>(false)
+    const [openFill, setOpenFill] = useState<boolean>(false)
+
+    const fetchUserID = async () => {
+        const res:any = await axios.get("http://localhost:8000/api/v1/auth/auth/callback", {withCredentials:true})
+        const email:string | null = res.data.user.email
+        console.log(email)
+        
+        if (email !== ""){
+            const res:any = axios.get(`http://localhost:8000/api/v1/user/email/${email}`)
+            .then((res)=>{
+                setUserID(res.data.ID)
+                console.log(res.data.ID)
+            })
+            return 0
+        }
+
+        return 0
+    }
 
     const handleSubmit = async () => {
         if (!(title === "" || location === "" || description === "" 
             || startDatetime === null || endDatetime === null)){
 
-            // -------------- to-do request user id --------------
-            
             const lat:string | null = params.get("lat")
             const lng:string | null = params.get("lng")
             const payload: Object = {
-                // suksom's user id for testing
-                creator_id: "d7432a53-9621-4e6b-9a98-62d2172bd0fa",
-                // "creator_id": "57af58f8-b2df-4659-99c1-c34035e767c7",
+                creator_id: userID,
                 title: title,
                 description: description,
                 start_time: startDatetime.toString(),
@@ -59,26 +85,30 @@ function page() {
                 longitude: Number(lng),
                 location: location
             }
+
             console.log(payload)
 
             try {
-                const res = await axios.post('http://localhost:8080/api/v1/activity/', payload)
+                const res:any = await axios.post('http://localhost:8000/api/v1/activity/', payload, {withCredentials:true},)
                 console.log('Response:', res.data);
                 router.push('/')
             } catch (err) {
                 console.error(err);
-                // -------------- to-do alert if error occurs --------------
+                setOpenAuth(true)
             }
+        } else {
+            setOpenFill(true)
         }
     }
 
+    useEffect(()=>{
+        fetchUserID()
+    },[])
 
-    const handleStep = () => {
-        if (step === 1){
-            setStep(step+1)
-        } 
-        // -------------- to-do handle step carefully --------------
-    }
+    const handleCloseAuth = () => {
+        setOpenAuth(false);
+        router.push("/login")
+    };
 
     const handleTitle = (event: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>) => {
         setTitle(event.target.value)
@@ -264,7 +294,7 @@ function page() {
                             <Button variant="contained" 
                             color={"info"} 
                             disabled={params.size <= 0} 
-                            onClick={handleStep}
+                            onClick={()=>setStep(step+1)}
                             >
                                 Next
                             </Button>
@@ -282,6 +312,48 @@ function page() {
                     </Box>
                 </Box>
             </div>
+
+            <Dialog
+                open={openAuth}
+                onClose={handleCloseAuth}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">
+                {"Something went wrong."}
+                </DialogTitle>
+                <DialogContent>
+                <DialogContentText id="alert-dialog-description">
+                    Please, sign in.
+                </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                <Button onClick={handleCloseAuth} autoFocus>
+                    OK
+                </Button>
+                </DialogActions>
+            </Dialog>
+
+            <Dialog
+                open={openFill}
+                // onClose={handleCloseAuth}
+                // aria-labelledby="alert-dialog-title"
+                // aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle>
+                {"Something went wrong."}
+                </DialogTitle>
+                <DialogContent>
+                <DialogContentText >
+                    Please, fill all the form.
+                </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                <Button onClick={()=>setOpenFill(false)} autoFocus>
+                    OK
+                </Button>
+                </DialogActions>
+            </Dialog>
         </ThemeProvider>
     )
 }

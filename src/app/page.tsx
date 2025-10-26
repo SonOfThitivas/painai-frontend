@@ -20,7 +20,7 @@ export default function Home() {
 
     useEffect(()=>{
         axios
-        .get("http://localhost:8080/api/v1/activity/")
+        .get("http://localhost:8000/api/v1/activity/")
         .then((res) => setData(res.data.data))
         .catch((err) => console.error(err));
     },[])

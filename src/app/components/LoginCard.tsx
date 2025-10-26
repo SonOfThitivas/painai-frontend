@@ -36,11 +36,11 @@ export default function LoginCard() {
             autoComplete="current-password"
           /> */}
 
-          <Button variant="contained" href="http://localhost:8000/v1/api/auth/google">
+          <Button variant="contained" href="http://localhost:8000/api/v1/auth/google">
             Login with Google
           </Button>
 
-          <Button variant="contained" href="http://localhost:8000/v1/api/auth/facebook">
+          <Button variant="contained" href="http://localhost:8000/api/v1/auth/facebook">
             Login with Facebook
           </Button>
 

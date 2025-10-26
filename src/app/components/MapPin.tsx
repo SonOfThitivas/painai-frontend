@@ -18,7 +18,14 @@ interface MapProps {
 
 
 const defaults = {
-    zoom: 10
+    zoom: 10,
+    minZoom: 6,
+    bounds: [
+        [22.167060640961587, 100.76447309999337],   // north
+        [9.709726514428047, 85.97863686627129],     // west
+        [15.533646623860792, 111.6507134093085],   // east
+        [4.58080276368839, 101.27367013230179],     // south
+    ]
 }
 
 function Map(Map: MapProps){
@@ -61,6 +68,8 @@ function Map(Map: MapProps){
             <MapContainer 
             center={params.size > 0 ? [params.get("lat"), params.get("lng")] : posix} 
             zoom={params.size > 0 ? params.get("zoom") : zoom}
+            minZoom={defaults.minZoom}
+            maxBounds={defaults.bounds}
             style={{ height: "100svh", width: "100%" }}
             >
                 
