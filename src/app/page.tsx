@@ -13,10 +13,10 @@ export default function Home() {
 
     // to avaliable Next.js Fast Reload
     const Map = dynamic(
-        () => import("@/app/components/Map"), {
-        ssr: false,
-        loading: () => <p>Loading...</p>,
-    });
+            () => import("@/app/components/Map"), {
+            ssr: false,
+            loading: () => <p>Loading...</p>,
+        });
 
     const [data, setData] = useState<Array<any>>([]);
     const [filter, setFilter] = useState<Array<any>>([]);

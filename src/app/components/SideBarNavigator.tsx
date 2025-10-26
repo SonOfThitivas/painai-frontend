@@ -110,14 +110,13 @@ interface AppBarProps extends MuiAppBarProps {
 
 export default function SideBarNavigator() {
   const theme = useTheme();
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = React.useState(false);
   const listItem = [
     { name: 'Home', path: '/' , icon: <HomeRoundedIcon />},
     { name: 'Activity Lobby', path: '/activity-lobby' , icon: <EventNoteRoundedIcon />},
     { name: 'Create an Activity', path: '/createactivity' , icon: <AddRoundedIcon />},
     { name: 'Profile', path:'/profile',icon: <Person2RoundedIcon />}
   ]
-
   const handleDrawer = () => {
     setOpen(!open)
   }
@@ -257,7 +256,8 @@ export default function SideBarNavigator() {
 
             <Divider />
         </Drawer>
-    
+            
+        
     </Box>
   );
 }
