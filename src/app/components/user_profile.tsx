@@ -32,6 +32,7 @@ import { alpha } from "@mui/material/styles";
 import theme from "./theme";
 import {ThemeProvider } from "@mui/system";
 import SideBarNavigator from "./SideBarNavigator";
+import { useRouter } from "next/navigation";
 
 // Interfaces
 interface User {
@@ -73,6 +74,7 @@ const UserProfile: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [uploading, setUploading] = useState<boolean>(false);
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+  const router = useRouter()
 
   // Activities state
   const [activitiesOpen, setActivitiesOpen] = useState(false);
@@ -417,12 +419,19 @@ const UserProfile: React.FC = () => {
 
   if (error && !user)
     return (
-      <Box sx={{ textAlign: "center", mt: 8 }}>
-        <Typography color="error">{error}</Typography>
-        <Button onClick={fetchUserProfile} variant="contained" sx={{ mt: 2 }}>
-          Retry
-        </Button>
-      </Box>
+        <ThemeProvider theme={theme}>
+            <Box sx={{ textAlign: "center", mt: 8 }}>
+                <Typography >{error}</Typography>
+                <Typography >Something went wrong.</Typography>
+                <Typography >Please, sign in or try again.</Typography>
+                <Button onClick={fetchUserProfile} variant="contained" sx={{ m: 2 }}>
+                    Retry
+                </Button>
+                <Button onClick={()=>router.push("/login")} variant="contained" sx={{ m: 2 }}>
+                    Login
+                </Button>
+            </Box>
+        </ThemeProvider>
     );
 
   if (!user) return <Typography>No profile found.</Typography>;
