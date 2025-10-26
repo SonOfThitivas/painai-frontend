@@ -1,0 +1,247 @@
+"use client"
+
+import React, { useState } from "react";
+import { Card, 
+    CardContent, 
+    Avatar, 
+    Typography, 
+    CardActions, 
+    Button, 
+    CardHeader, 
+    Stack, 
+    Box, 
+    ThemeProvider,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+} from "@mui/material";
+import EventIcon from '@mui/icons-material/CalendarMonthOutlined';
+import PlaceIcon from '@mui/icons-material/FmdGood';
+import { red } from '@mui/material/colors';
+import theme from "./theme";
+import { useRouter } from "next/navigation";
+import axios from "axios";
+
+interface ActivityCardProps {
+  title?: string;
+  description?: string;
+  date?: string;
+  username?: string;
+  place?: string;
+  avatarUrl?: string;
+  images?: string[];
+  maxParticipants?: number;
+  participants?: number;
+  isAuth?: boolean;
+  members?: Array<any>;
+  userID?: string;
+  activityID?: string;
+}
+
+export default function ActivityCard({
+  title = "Default Activity",
+  description = "No description available.",
+  date = "Unknown date",
+  username = "Anonymous",
+  place = "KMUTNB",
+  images = [],
+  avatarUrl = "null",
+  maxParticipants = 0,
+  participants = 0,
+  isAuth = false,
+  members = [],
+  userID = "",
+  activityID = "",
+}: ActivityCardProps) {
+
+  const [showFullText, setShowFullText] = useState<boolean>(false);
+  const [openAuth, setOpenAuth] = useState<boolean>(false);
+  const router = useRouter()
+
+  // grid column layout based on number of images
+  const getGridColumns = (num: number) => {
+    if (num === 1) return "1fr";
+    if (num === 2) return "1fr 1fr";
+    if (num === 3) return "1fr 1fr";
+    return "1fr 1fr"; // 4+ images → 2x2 grid
+  };
+
+    const handleJoin = async () => {
+        if (isAuth){
+            if (participants < maxParticipants){
+                const body = {
+                    "activity_id": activityID,
+                    "user_id": userID
+                }
+                const res:any = await axios.post("http://localhost:8000/api/v1/activity/join", body)
+                
+                router.refresh()
+            } else {
+                // TODO: handle outbound 
+            }
+
+        } else {
+            setOpenAuth(true)
+        }
+    }
+
+    const handleCancel = async () => {
+        if (isAuth){
+            // TODO: wait API cancel join
+        } else {
+            setOpenAuth(true)
+        }
+    }
+
+    const handleCloseAuth = () => {
+        setOpenAuth(false);
+        router.push("/login")
+    };
+
+  return (
+    <ThemeProvider theme={theme}>
+
+        <Card sx={{ width: 700, minHeight: 345, m: 1, boxShadow: 3, borderRadius: 2 }}>
+        
+        <CardHeader
+            avatar={
+            avatarUrl ? (
+                <Avatar
+                src={avatarUrl}           // show image if URL exists
+                sx={{ width: 60, height: 60 }}
+                aria-label="user"
+                />
+            ) : (
+                <Avatar
+                sx={{ width: 60, height: 60, bgcolor: red[500] }}
+                aria-label="user"
+                >
+                
+                </Avatar>
+            )
+            }
+            title={<Typography variant="subtitle1" fontWeight="bold">{username}</Typography>}
+            subheader={
+            <Stack direction="row" spacing={5}>
+                <Stack direction="row" alignItems="center" spacing={0.5}>
+                <EventIcon fontSize="medium" color="action" />
+                <Typography variant="caption">{date}</Typography>
+                </Stack>
+                <Stack direction="row" alignItems="center" spacing={0.5}>
+                <PlaceIcon fontSize="medium" color="action" />
+                <Typography variant="caption">{place}</Typography>
+                </Stack>
+            </Stack>
+            }
+        />
+
+        <CardContent>
+            <Typography variant="h6" fontWeight="bold">{title}</Typography>
+            <Typography variant="body2" color="text.secondary">
+            {description.length <= 400 || showFullText
+                ? description
+                : `${description.substring(0, 400)}...`}
+            {description.length > 400 && (
+                <Button
+                size="small"
+                onClick={() => setShowFullText(!showFullText)}
+                sx={{ textTransform: "none", ml: 0.5 }}
+                >
+                {showFullText ? "Read less" : "Read more"}
+                </Button>
+            )}
+            </Typography>
+        </CardContent>
+
+        {images.length > 0 && (
+            <Box sx={{ display: "flex", justifyContent: "center", mt: 1, mb: 1 }}>
+            <Box
+                sx={{
+                display: "grid",
+                gap: 0.5,
+                width: "90%",
+                gridTemplateColumns: getGridColumns(images.length),
+                }}
+            >
+                {images.map((img, index) => (
+                <Box
+                    key={index}
+                    component="img"
+                    src={img}
+                    alt={`activity-${index}`}
+                    sx={{
+                    width: "100%",
+                    height: 150,
+                    objectFit: "cover",
+                    borderRadius: 1,
+                    }}
+                />
+                ))}
+            </Box>
+            </Box>
+        )}
+
+        <CardActions sx={{width:1, display:"flex", flexDirection:"column", alignItems:"end"}}>
+            <Box component={"div"}>
+                <Button variant="contained" color="success" sx={{m:1}} 
+                onClick={handleJoin} disabled={members.includes(userID) ? true : false}>
+                    Join
+                </Button>
+                <Button variant="contained" color="error"  sx={{m:1}} 
+                onClick={handleCancel} disabled={members.includes(userID) ? false : true}>
+                    Cancel
+                </Button>
+            </Box>
+            <Typography variant="h6" sx={{m:1}}>{participants} / {maxParticipants} joined</Typography>
+        </CardActions>
+
+        </Card>
+        
+        {/* Alert if you are not authenticated */}
+        <Dialog
+            open={openAuth}
+            onClose={handleCloseAuth}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+        >
+            <DialogTitle id="alert-dialog-title">
+            {"You haven't authenticated yet."}
+            </DialogTitle>
+            <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+                Please, sign in.
+            </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+            <Button onClick={handleCloseAuth} autoFocus>
+                OK
+            </Button>
+            </DialogActions>
+        </Dialog>
+
+        <Dialog
+            open={openAuth}
+            onClose={handleCloseAuth}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+        >
+            <DialogTitle id="alert-dialog-title">
+            {"You haven't authenticated yet."}
+            </DialogTitle>
+            <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+                Please, sign in.
+            </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+            <Button onClick={handleCloseAuth} autoFocus>
+                OK
+            </Button>
+            </DialogActions>
+        </Dialog>
+
+    </ThemeProvider>
+  );
+}

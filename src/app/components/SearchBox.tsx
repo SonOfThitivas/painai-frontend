@@ -13,12 +13,14 @@ interface SearchBoxProp {
     data? : Array<any>;
     title? : RefObject<string>;
     setTitle?: Dispatch<SetStateAction<string>>;
+    position?: string;
 }
 
 function SearchBox(
    { label = "Search",
     data = [],
-    title, setTitle
+    title, setTitle,
+    position="fixed",
     } : SearchBoxProp
 ) {
 
@@ -36,7 +38,7 @@ function SearchBox(
   return (
     <ThemeProvider theme={theme}>
         <Autocomplete
-            sx={{ width: 1/2, position:"fixed", top:0, marginTop:5, left:"25%", zIndex:1000,}}
+            sx={{ width: 1/2, position:{position}, top:0, marginTop:5, left:"25%", zIndex:1000,}}
             freeSolo
             id="free-solo-2-demo"
             onInputChange={handleInputChange}
