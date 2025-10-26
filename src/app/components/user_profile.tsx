@@ -31,6 +31,7 @@ import PeopleIcon from "@mui/icons-material/People";
 import { alpha } from "@mui/material/styles";
 import theme from "./theme";
 import {ThemeProvider } from "@mui/system";
+import SideBarNavigator from "./SideBarNavigator";
 
 // Interfaces
 interface User {
@@ -253,9 +254,8 @@ const UserProfile: React.FC = () => {
       setActivitiesLoading(true);
       setActivitiesError(null);
       const response = await fetch(
-        // `http://localhost:8000/api/v1/activity/by-user?user_id=${user.ID}`
-        `http://localhost:8000/api/v1/activity/by-user?user_id=${"6ba208b0-f0a9-4ee8-8e3a-594085aaf31c"}`
-        
+        `http://localhost:8000/api/v1/activity/by-user?user_id=${user.ID}`
+        // `http://localhost:8000/api/v1/activity/by-user?user_id=${"6ba208b0-f0a9-4ee8-8e3a-594085aaf31c"}`
       );
       if (!response.ok) throw new Error(`API error: ${response.status}`);
       const data: Activity[] = await response.json();
@@ -429,6 +429,7 @@ const UserProfile: React.FC = () => {
 
   return (
     <ThemeProvider theme={theme}>
+      <SideBarNavigator/>
       <Box
         sx={{
           position: "flex",
@@ -810,7 +811,7 @@ const UserProfile: React.FC = () => {
 
             {/* Buttons */}
             <Button
-              variant="outlined"
+              variant="contained"
               onClick={handleActivitiesOpen}
               fullWidth
               sx={{
@@ -902,7 +903,7 @@ const UserProfile: React.FC = () => {
                             borderColor: 'divider'
                           }}>
                             {/* Description */}
-                            <Typography variant="subtitle2" gutterBottom>
+                            <Typography gutterBottom>
                               Description:
                             </Typography>
                             <Typography variant="body2" paragraph>
