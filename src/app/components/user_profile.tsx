@@ -113,9 +113,9 @@ const UserProfile: React.FC = () => {
           }
       );
 
-      if (!res.ok) {
-        throw new Error(`Auth API error: ${res.status}`);
-      }
+      // if (!res.ok) {
+      //   throw new Error(`Auth API error: ${res.status}`);
+      // }
 
       const userEmail = res.data.user.email;
 
