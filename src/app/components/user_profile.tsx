@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect,useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Box,
   Button,
@@ -31,7 +31,7 @@ import PeopleIcon from "@mui/icons-material/People";
 import { alpha } from "@mui/material/styles";
 import theme from "./theme";
 import axios from 'axios';
-import {ThemeProvider } from "@mui/system";
+import { ThemeProvider } from "@mui/system";
 import SideBarNavigator from "./SideBarNavigator";
 import { useRouter } from "next/navigation";
 
@@ -42,7 +42,6 @@ interface User {
   PasswordHash: string;
   DisplayName: string;
   AvatarURL: string;
-  AvatarData: string; // Base64 encoded image data
   Bio: string;
   CreatedAt: string;
   UpdatedAt: string;
@@ -50,20 +49,13 @@ interface User {
   Age: number;
 }
 
-// interface AuthResponse {
-//   user: {
-//     email: string;
-//     name: string;
-//   };
-// }
-
 interface Activity {
   ID: string;
   Title: string;
   Description: string;
   CreatedAt: string;
   Location: string;
-  MaxParticipants: number| null;
+  MaxParticipants: number | null;
 }
 
 const UserProfile: React.FC = () => {
@@ -74,8 +66,8 @@ const UserProfile: React.FC = () => {
   const [saving, setSaving] = useState<boolean>(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [uploading, setUploading] = useState<boolean>(false);
-  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
-  const router = useRouter()
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const router = useRouter();
 
   // Activities state
   const [activitiesOpen, setActivitiesOpen] = useState(false);
@@ -97,25 +89,21 @@ const UserProfile: React.FC = () => {
   }, []);
 
   const fetchUserProfile = async (): Promise<void> => {
-    const token = localStorage.getItem("jwt_token"); 
-    console.log("Profile token", token)
+    const token = localStorage.getItem("jwt_token");
+    console.log("Profile token", token);
     try {
       setLoading(true);
       setError(null);
 
       // Step 1: Fetch email from auth API
       const res: any = await axios.get(
-          `https://painai-backend.graypebble-936b89d4.japanwest.azurecontainerapps.io/api/v1/auth/auth/callback`,
-          {
-              headers: {
-                  Authorization: `Bearer ${token}`,
-              },
-          }
+        `https://painai-backend.graypebble-936b89d4.japanwest.azurecontainerapps.io/api/v1/auth/auth/callback`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
-
-      // if (!res.ok) {
-      //   throw new Error(`Auth API error: ${res.status}`);
-      // }
 
       const userEmail = res.data.user.email;
 
@@ -257,7 +245,6 @@ const UserProfile: React.FC = () => {
       setActivitiesError(null);
       const response = await fetch(
         `https://painai-backend.graypebble-936b89d4.japanwest.azurecontainerapps.io/api/v1/activity/by-user?user_id=${user.ID}`
-        // `https://painai-backend.graypebble-936b89d4.japanwest.azurecontainerapps.io/api/v1/activity/by-user?user_id=${"6ba208b0-f0a9-4ee8-8e3a-594085aaf31c"}`
       );
       if (!response.ok) throw new Error(`API error: ${response.status}`);
       const data: Activity[] = await response.json();
@@ -271,7 +258,7 @@ const UserProfile: React.FC = () => {
 
   const handleActivitiesOpen = () => {
     setActivitiesOpen(true);
-    setExpandedActivity(null); // Reset expanded state when opening dialog
+    setExpandedActivity(null);
     fetchActivities();
   };
 
@@ -302,10 +289,10 @@ const UserProfile: React.FC = () => {
   };
 
   const formatMaxParticipants = (maxParticipants: number | null): string => {
-  if (maxParticipants === null || maxParticipants === undefined) {
-    return "Not specified";
-  }
-  return `${maxParticipants} participants`;
+    if (maxParticipants === null || maxParticipants === undefined) {
+      return "Not specified";
+    }
+    return `${maxParticipants} participants`;
   };
 
   const handleImageClick = () => {
@@ -340,20 +327,14 @@ const UserProfile: React.FC = () => {
         size: file.size
       });
 
-      // Use FormData with both image file and email
       const formData = new FormData();
-      formData.append('image', file); // File field
-      formData.append('email', user.Email); // Email field
-
-      // Log FormData contents for debugging
-      for (let [key, value] of formData.entries()) {
-        console.log(`FormData: ${key} =`, value);
-      }
+      formData.append('image', file);
+      formData.append('email', user.Email);
 
       const response = await fetch('https://painai-backend.graypebble-936b89d4.japanwest.azurecontainerapps.io/api/v1/user/UpdateUserAvatarURL', {
         method: 'PUT',
         credentials: 'include',
-        body: formData, // Don't set Content-Type header, let browser set it with boundary
+        body: formData,
       });
 
       console.log("Response status:", response.status);
@@ -366,20 +347,18 @@ const UserProfile: React.FC = () => {
 
       const responseData = await response.json();
       console.log("Upload response:", responseData);
-      
-      // Update local state with the new avatar data
-      if (responseData.avatar_data || responseData.AvatarData) {
-        const newAvatarData = responseData.avatar_data || responseData.AvatarData;
-        setUser(prev => prev ? { ...prev, AvatarData: newAvatarData } : prev);
+
+      // Update local state with the new avatar URL
+      if (responseData.avatar_url || responseData.AvatarURL) {
+        const newAvatarURL = responseData.avatar_url || responseData.AvatarURL;
+        setUser(prev => prev ? { ...prev, AvatarURL: newAvatarURL } : prev);
         setSuccessMessage('Profile image updated successfully!');
         setTimeout(() => setSuccessMessage(null), 3000);
       } else if (responseData.user) {
-        // If response has full user object
         setUser(responseData.user);
         setSuccessMessage('Profile image updated successfully!');
         setTimeout(() => setSuccessMessage(null), 3000);
       } else {
-        // If API doesn't return the data, refetch the user profile
         await fetchUserProfile();
         setSuccessMessage('Profile image updated successfully!');
         setTimeout(() => setSuccessMessage(null), 3000);
@@ -389,25 +368,18 @@ const UserProfile: React.FC = () => {
       setError(err instanceof Error ? err.message : 'Failed to upload image');
     } finally {
       setUploading(false);
-      // Clear the file input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
     }
   };
 
-  const getImageSrc = (avatarData: string): string => {
-    if (avatarData && avatarData.trim() !== '') {
-      // Check if it already has data URL prefix
-      if (avatarData.startsWith('data:image/')) {
-        return avatarData;
-      }
-      // Assume it's base64 data and add the prefix
-      return `data:image/jpeg;base64,${avatarData}`;
+  const getImageSrc = (avatarURL: string): string => {
+    if (avatarURL && avatarURL.trim() !== '') {
+      return avatarURL;
     }
     return '/BALDING.png';
   };
-
 
   if (loading)
     return (
@@ -419,26 +391,26 @@ const UserProfile: React.FC = () => {
 
   if (error && !user)
     return (
-        <ThemeProvider theme={theme}>
-            <Box sx={{ textAlign: "center", mt: 8 }}>
-                <Typography >{error}</Typography>
-                <Typography >Something went wrong.</Typography>
-                <Typography >Please, sign in or try again.</Typography>
-                <Button onClick={fetchUserProfile} variant="contained" sx={{ m: 2 }}>
-                    Retry
-                </Button>
-                <Button onClick={()=>router.push("/login")} variant="contained" sx={{ m: 2 }}>
-                    Login
-                </Button>
-            </Box>
-        </ThemeProvider>
+      <ThemeProvider theme={theme}>
+        <Box sx={{ textAlign: "center", mt: 8 }}>
+          <Typography>{error}</Typography>
+          <Typography>Something went wrong.</Typography>
+          <Typography>Please, sign in or try again.</Typography>
+          <Button onClick={fetchUserProfile} variant="contained" sx={{ m: 2 }}>
+            Retry
+          </Button>
+          <Button onClick={() => router.push("/login")} variant="contained" sx={{ m: 2 }}>
+            Login
+          </Button>
+        </Box>
+      </ThemeProvider>
     );
 
   if (!user) return <Typography>No profile found.</Typography>;
 
   return (
     <ThemeProvider theme={theme}>
-      <SideBarNavigator/>
+      <SideBarNavigator />
       <Box
         sx={{
           position: "flex",
@@ -452,22 +424,22 @@ const UserProfile: React.FC = () => {
           background: `linear-gradient(180deg, ${theme.palette.primary.main}  , ${theme.palette.secondary.main})`,
           color: theme.palette.background.default,
           boxShadow: 4,
-          [theme.breakpoints.down('sm')]: { 
-            maxWidth: '100%',           
-            mx: 0,                     
-            mt: 0,                    
-            mb: 0,                      
-            borderRadius: 0,            
-            p: 2,                       
-            minHeight: '100vh',         
+          [theme.breakpoints.down('sm')]: {
+            maxWidth: '100%',
+            mx: 0,
+            mt: 0,
+            mb: 0,
+            borderRadius: 0,
+            p: 2,
+            minHeight: '100vh',
           }
-          }}
-        >
+        }}
+      >
         {/* Avatar */}
         <Box sx={{ textAlign: "center", mt: 3, mb: 5, position: "relative" }}>
-          <Box 
-            sx={{ 
-              position: "relative", 
+          <Box
+            sx={{
+              position: "relative",
               display: "inline-block",
               cursor: isEditing ? "pointer" : "default",
               "&:hover": isEditing ? {
@@ -485,11 +457,6 @@ const UserProfile: React.FC = () => {
             <Avatar
               src={getImageSrc(user.AvatarURL)}
               alt={`${user.DisplayName}'s profile`}
-              className="profile-image"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = "/BALDING.png";
-              }}
               sx={{
                 width: 120,
                 height: 120,
@@ -498,7 +465,7 @@ const UserProfile: React.FC = () => {
                 transition: "all 0.3s ease",
               }}
             />
-            
+
             {isEditing && (
               <Box
                 className="edit-overlay"
@@ -513,21 +480,34 @@ const UserProfile: React.FC = () => {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  opacity: 0, 
+                  opacity: 0,
                   transition: "all 0.3s ease",
                   cursor: "pointer",
                 }}
               >
-                <EditRoundedIcon 
-                  sx={{ 
-                    color: "white", 
+                <EditRoundedIcon
+                  sx={{
+                    color: "white",
                     fontSize: 32,
                     filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.5))"
-                  }} 
+                  }}
                 />
               </Box>
             )}
           </Box>
+          {uploading && (
+            <CircularProgress
+              size={40}
+              sx={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                marginTop: -2,
+                marginLeft: -2,
+                color: "white",
+              }}
+            />
+          )}
         </Box>
 
         <input
@@ -540,7 +520,6 @@ const UserProfile: React.FC = () => {
 
         {/* Editing Form */}
         {isEditing ? (
-
           <Box
             sx={{
               display: "flex",
@@ -553,7 +532,6 @@ const UserProfile: React.FC = () => {
               gap: 2,
             }}
           >
-        
             <Grid container direction={"row"} justifyContent={"center"} spacing={2.5} padding={2}>
               <Grid size={12}>
                 <Typography mb={1}>
@@ -568,7 +546,7 @@ const UserProfile: React.FC = () => {
                     borderRadius: "10px",
                     backgroundColor: alpha(theme.palette.background.default, 0.15),
                     "& .MuiInputBase-input": {
-                      color: theme.palette.background.default, 
+                      color: theme.palette.background.default,
                     },
                     "& .MuiOutlinedInput-root": {
                       "& fieldset": {
@@ -586,7 +564,7 @@ const UserProfile: React.FC = () => {
                 />
               </Grid>
 
-              <Grid  size={12}>
+              <Grid size={12}>
                 <Typography mb={1}>
                   Bio
                 </Typography>
@@ -601,7 +579,7 @@ const UserProfile: React.FC = () => {
                     borderRadius: "10px",
                     backgroundColor: alpha(theme.palette.background.default, 0.15),
                     "& .MuiInputBase-input": {
-                      color: theme.palette.background.default, 
+                      color: theme.palette.background.default,
                     },
                     "& .MuiOutlinedInput-root": {
                       "& fieldset": {
@@ -619,7 +597,7 @@ const UserProfile: React.FC = () => {
                 />
               </Grid>
 
-              <Grid  size={12}>
+              <Grid size={12}>
                 <Typography mb={1}>
                   Sex
                 </Typography>
@@ -633,7 +611,7 @@ const UserProfile: React.FC = () => {
                     borderRadius: "10px",
                     backgroundColor: alpha(theme.palette.background.default, 0.15),
                     "& .MuiInputBase-input": {
-                      color: theme.palette.background.default, 
+                      color: theme.palette.background.default,
                     },
                     "& .MuiOutlinedInput-root": {
                       "& fieldset": {
@@ -655,7 +633,7 @@ const UserProfile: React.FC = () => {
                 </TextField>
               </Grid>
 
-              <Grid  size={12}>
+              <Grid size={12}>
                 <Typography>
                   Age
                 </Typography>
@@ -669,7 +647,7 @@ const UserProfile: React.FC = () => {
                     borderRadius: "10px",
                     backgroundColor: alpha(theme.palette.background.default, 0.15),
                     "& .MuiInputBase-input": {
-                      color: theme.palette.background.default, 
+                      color: theme.palette.background.default,
                     },
                     "& .MuiOutlinedInput-root": {
                       "& fieldset": {
@@ -703,16 +681,16 @@ const UserProfile: React.FC = () => {
                 >
                   {saving ? <CircularProgress size={24} sx={{ color: "lightgrey" }} /> : "Save"}
                 </Button>
-                
-                <Button 
-                  variant="contained" 
-                  onClick={handleCancel} 
-                  disabled={saving} 
-                  color="error" 
+
+                <Button
+                  variant="contained"
+                  onClick={handleCancel}
+                  disabled={saving}
+                  color="error"
                   startIcon={<CancelIcon />}
                   fullWidth
                   sx={{
-                    py: 2,        
+                    py: 2,
                     fontSize: "1.1rem",
                     borderRadius: "12px",
                   }}
@@ -783,8 +761,8 @@ const UserProfile: React.FC = () => {
                   <Chip
                     label={formatSex(user.Sex)}
                     sx={{
-                      color: theme.palette.background.paper, 
-                      bgcolor: alpha(theme.palette.primary.main, 0.5),   
+                      color: theme.palette.background.paper,
+                      bgcolor: alpha(theme.palette.primary.main, 0.5),
                       textTransform: "capitalize",
                     }}
                   />
@@ -807,10 +785,10 @@ const UserProfile: React.FC = () => {
                 >
                   <Typography padding={1}>Age</Typography>
                   <Chip
-                    label={`${user.Age} years old`} 
+                    label={`${user.Age} years old`}
                     sx={{
-                      color: theme.palette.background.paper, 
-                      bgcolor: alpha(theme.palette.primary.main, 0.5),   
+                      color: theme.palette.background.paper,
+                      bgcolor: alpha(theme.palette.primary.main, 0.5),
                       textTransform: "capitalize",
                     }}
                   />
@@ -860,7 +838,7 @@ const UserProfile: React.FC = () => {
 
             {/* Activities Dialog */}
             <Dialog open={activitiesOpen} onClose={handleActivitiesClose} fullWidth maxWidth="sm">
-              <DialogTitle sx={{ 
+              <DialogTitle sx={{
                 bgcolor: theme.palette.primary.main,
                 color: theme.palette.background.default
               }}>
@@ -886,7 +864,7 @@ const UserProfile: React.FC = () => {
                   <List sx={{ width: '100%' }}>
                     {activities.map((activity) => (
                       <div key={activity.ID}>
-                        <ListItemButton 
+                        <ListItemButton
                           onClick={() => handleActivityClick(activity.ID)}
                           sx={{
                             borderBottom: '1px solid',
@@ -896,7 +874,7 @@ const UserProfile: React.FC = () => {
                             }
                           }}
                         >
-                          <ListItemText 
+                          <ListItemText
                             primary={activity.Title}
                             secondary={`Created: ${formatDate(activity.CreatedAt)}`}
                           />
@@ -905,8 +883,8 @@ const UserProfile: React.FC = () => {
                           </IconButton>
                         </ListItemButton>
                         <Collapse in={expandedActivity === activity.ID} timeout="auto" unmountOnExit>
-                          <Box sx={{ 
-                            p: 2, 
+                          <Box sx={{
+                            p: 2,
                             bgcolor: 'background.default',
                             borderBottom: '1px solid',
                             borderColor: 'divider'
