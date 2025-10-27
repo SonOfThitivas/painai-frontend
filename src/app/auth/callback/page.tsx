@@ -10,9 +10,11 @@ export default function AuthCallback() {
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
 
+    console.log("call back token", token)
+
     if (token) {
       // ✅ Save the token locally
-      localStorage.setItem("token", token);
+      localStorage.setItem("jwt_token", token);
 
       // ✅ Redirect to home or dashboard
       router.push("/");

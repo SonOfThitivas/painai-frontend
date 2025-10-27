@@ -20,6 +20,7 @@ export default function ActivityLobby() {
     const fetchUserID = async () => {
         // Get the token from localStorage (set when user logs in)
         const token = localStorage.getItem("jwt_token"); 
+        console.log(token, 'activity token')
         if (!token) {
             setIsAuth(false);
             return "";
