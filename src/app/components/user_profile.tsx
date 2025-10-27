@@ -98,6 +98,7 @@ const UserProfile: React.FC = () => {
 
   const fetchUserProfile = async (): Promise<void> => {
     const token = localStorage.getItem("jwt_token"); 
+    console.log("Profile token", token)
     try {
       setLoading(true);
       setError(null);
