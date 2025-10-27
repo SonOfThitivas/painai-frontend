@@ -50,8 +50,20 @@ const CreateAct = () => {
     const [params, setParams] = useState(new URLSearchParams(searchParams.toString()))
 
     const fetchUserID = async () => {
-        const res:any = await axios.get("https://painai-backend.graypebble-936b89d4.japanwest.azurecontainerapps.io/api/v1/auth/auth/callback", {withCredentials:true})
-        const email:string | null = res.data.user.email
+        const token = localStorage.getItem("jwt_token"); 
+        if (!token) {
+            console.log("No Token Bro.")
+            return "";
+        }
+        const res: any = await axios.get(
+            `https://painai-backend.graypebble-936b89d4.japanwest.azurecontainerapps.io/api/v1/auth/auth/callback`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+        const email = res.data.user.email;
         console.log(email)
         
         if (email !== ""){

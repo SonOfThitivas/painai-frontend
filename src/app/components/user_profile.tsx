@@ -30,6 +30,7 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import PeopleIcon from "@mui/icons-material/People";
 import { alpha } from "@mui/material/styles";
 import theme from "./theme";
+import axios from 'axios';
 import {ThemeProvider } from "@mui/system";
 import SideBarNavigator from "./SideBarNavigator";
 import { useRouter } from "next/navigation";
@@ -49,12 +50,12 @@ interface User {
   Age: number;
 }
 
-interface AuthResponse {
-  user: {
-    email: string;
-    name: string;
-  };
-}
+// interface AuthResponse {
+//   user: {
+//     email: string;
+//     name: string;
+//   };
+// }
 
 interface Activity {
   ID: string;
@@ -96,28 +97,26 @@ const UserProfile: React.FC = () => {
   }, []);
 
   const fetchUserProfile = async (): Promise<void> => {
+    const token = localStorage.getItem("jwt_token"); 
     try {
       setLoading(true);
       setError(null);
 
       // Step 1: Fetch email from auth API
-      const authResponse = await fetch(
-        "https://painai-backend.graypebble-936b89d4.japanwest.azurecontainerapps.io/api/v1/auth/auth/callback",
-        {
-          method: "GET",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+      const res: any = await axios.get(
+          `https://painai-backend.graypebble-936b89d4.japanwest.azurecontainerapps.io/api/v1/auth/auth/callback`,
+          {
+              headers: {
+                  Authorization: `Bearer ${token}`,
+              },
+          }
       );
 
-      if (!authResponse.ok) {
-        throw new Error(`Auth API error: ${authResponse.status}`);
+      if (!res.ok) {
+        throw new Error(`Auth API error: ${res.status}`);
       }
 
-      const authData: AuthResponse = await authResponse.json();
-      const userEmail = authData.user?.email;
+      const userEmail = res.data.user.email;
 
       if (!userEmail) {
         throw new Error("No email found in auth response");
@@ -350,7 +349,7 @@ const UserProfile: React.FC = () => {
         console.log(`FormData: ${key} =`, value);
       }
 
-      const response = await fetch('https://painai-backend.graypebble-936b89d4.japanwest.azurecontainerapps.io/api/v1/user/UpdateAvartarData', {
+      const response = await fetch('https://painai-backend.graypebble-936b89d4.japanwest.azurecontainerapps.io/api/v1/user/UpdateUserAvatarURL', {
         method: 'PUT',
         credentials: 'include',
         body: formData, // Don't set Content-Type header, let browser set it with boundary

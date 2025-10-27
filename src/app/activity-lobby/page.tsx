@@ -25,7 +25,6 @@ export default function ActivityLobby() {
             setIsAuth(false);
             return "";
         }
-
         try {
             // Send token to backend for verification
             const res: any = await axios.get(
@@ -36,15 +35,12 @@ export default function ActivityLobby() {
                     },
                 }
             );
-
             setIsAuth(true);
-
             // Get user ID from backend response
             const email = res.data.user.email;
             const resUser: any = await axios.get(
                 `https://painai-backend.graypebble-936b89d4.japanwest.azurecontainerapps.io/api/v1/user/email/${email}`
             );
-
             return resUser.data.ID;
         } catch (err) {
             setIsAuth(false);
