@@ -10,37 +10,46 @@ import theme from '../components/theme';
 import SearchBox from '../components/SearchBox';
 
 export default function ActivityLobby() {
-
     const [data, setData] = React.useState<null | Array<any>>([]);
     const [isAuth, setIsAuth] = React.useState<boolean>(false);
     const [userID, setUserID] = React.useState<string>("");
     const [title, setTitle] = React.useState<string>("");
     const [dataAct, setDataAct] = React.useState<Array<any>>([])
-
+    
     // fetch browsing user ID
     const fetchUserID = async () => {
-        // check session
-        let isSession: boolean = false;
-        const res:any = await axios.get(`https://painai-backend.graypebble-936b89d4.japanwest.azurecontainerapps.io/api/v1/auth/auth/callback`, {withCredentials:true,})
-        .then((res)=>{
-            isSession = true
-            setIsAuth(true)
-            return res
-        })
-        .catch((err)=>{
-            setIsAuth(false)
-            return err
-        })
-
-        // find user id by email
-        if (isSession) {
-            const email = res.data.user.email
-            const resUser:any = await axios.get(`https://painai-backend.graypebble-936b89d4.japanwest.azurecontainerapps.io/api/v1/user/email/${email}`)
-            return resUser.data.ID
-        } else {
-            return ""
+        // Get the token from localStorage (set when user logs in)
+        const token = localStorage.getItem("jwt_token"); 
+        if (!token) {
+            setIsAuth(false);
+            return "";
         }
-    }
+
+        try {
+            // Send token to backend for verification
+            const res: any = await axios.get(
+                `https://painai-backend.graypebble-936b89d4.japanwest.azurecontainerapps.io/api/v1/auth/auth/callback`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            setIsAuth(true);
+
+            // Get user ID from backend response
+            const email = res.data.user.email;
+            const resUser: any = await axios.get(
+                `https://painai-backend.graypebble-936b89d4.japanwest.azurecontainerapps.io/api/v1/user/email/${email}`
+            );
+
+            return resUser.data.ID;
+        } catch (err) {
+            setIsAuth(false);
+            return "";
+        }
+    };
 
     // fetch username from creator id
     const fetchUser = async (userID:String) => {
