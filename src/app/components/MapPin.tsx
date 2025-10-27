@@ -2,8 +2,8 @@
 
 import { MapContainer, TileLayer, Marker, Popup ,useMapEvents } from "react-leaflet"
 import { LatLngExpression, LatLngTuple } from 'leaflet';
-import { useRouter, useSearchParams} from 'next/navigation'
-import { useState, Suspense} from "react";
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useState, } from "react";
 
 import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css";
@@ -11,8 +11,7 @@ import "leaflet-defaulticon-compatibility";
 
 interface MapProps {
     posix: LatLngExpression | LatLngTuple,
-    getLocation? : LatLngExpression | LatLngTuple,
-
+    params?: string,
     zoom?: number,
 }
 
@@ -29,10 +28,9 @@ const defaults = {
 }
 
 function Map(Map: MapProps){
-    let {zoom = defaults.zoom, posix, getLocation = null} = Map
+    let {zoom = defaults.zoom, posix, params} = Map
     const router = useRouter()
     const searchParams = useSearchParams()
-    const [params, setParams] = useState(new URLSearchParams(searchParams.toString()))
 
 
     function ClickLocation() {
@@ -64,7 +62,7 @@ function Map(Map: MapProps){
 }
 
     return(
-        <Suspense>
+
             <MapContainer 
             center={params.size > 0 ? [params.get("lat"), params.get("lng")] : posix} 
             zoom={params.size > 0 ? params.get("zoom") : zoom}
@@ -82,8 +80,7 @@ function Map(Map: MapProps){
 
                 {params.size > 0 && <Marker position={[params.get("lat"), params.get("lng")]}/>}
 
-            </MapContainer>
-        </Suspense>
+        </MapContainer>
     )
 }
 

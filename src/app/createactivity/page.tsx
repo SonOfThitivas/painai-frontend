@@ -12,7 +12,7 @@ import { Box,
     DialogContent,
     DialogContentText,
 } from "@mui/material"
-import { ChangeEventHandler, useEffect, Suspense, useState } from "react";
+import { ChangeEventHandler, useEffect, Suspense, useState,} from "react";
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -24,8 +24,8 @@ import { useRouter, useSearchParams} from 'next/navigation'
 import axios from "axios";
 import SideBarNavigator from "../components/SideBarNavigator";
 
-function page() {
-    
+const CreateAct = () => {
+        
     const Map = dynamic(
         () => import("@/app/components/MapPin"), {
         ssr: false,
@@ -153,7 +153,6 @@ function page() {
     }
 
     return (
-        <Suspense>
         <ThemeProvider theme={theme}>
             <SideBarNavigator/>
             <div>
@@ -188,7 +187,7 @@ function page() {
                     {step === 1 &&
                     
                         <Box component="div" sx={{width: 1}}>
-                            <Map posix={[13.82152778382708, 100.51345467567444]} />
+                            <Map posix={[13.82152778382708, 100.51345467567444]} params={params} />
                         </Box>
                     }
 
@@ -359,6 +358,14 @@ function page() {
                 </DialogActions>
             </Dialog>
         </ThemeProvider>
+    )
+}
+
+function page() {
+    
+    return(
+        <Suspense>
+            <CreateAct/>
         </Suspense>
     )
 }
