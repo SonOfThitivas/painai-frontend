@@ -8,7 +8,7 @@ export default function LoginCard() {
         justifyContent: "center",
         alignItems: "center",      
         height: "100vh",           
-        backgroundColor: "#e0e0e0", 
+        backgroundColor: "#ff0000ff", 
       }}
     >
       <Box
