@@ -3,7 +3,7 @@
 import { MapContainer, TileLayer, Marker, Popup ,useMapEvents } from "react-leaflet"
 import { LatLngExpression, LatLngTuple } from 'leaflet';
 import { useRouter, useSearchParams} from 'next/navigation'
-import { useState} from "react";
+import { useState, Suspense} from "react";
 
 import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css";
@@ -32,7 +32,7 @@ function Map(Map: MapProps){
     let {zoom = defaults.zoom, posix, getLocation = null} = Map
     const router = useRouter()
     const searchParams = useSearchParams()
-    let params = new URLSearchParams(searchParams.toString())
+    const [params, setParams] = useState(new URLSearchParams(searchParams.toString()))
 
 
     function ClickLocation() {
@@ -42,11 +42,11 @@ function Map(Map: MapProps){
     const map = useMapEvents({
         click: (e) => {
             // query params
-            params = new URLSearchParams(searchParams.toString())
-            params.set("zoom", map.getZoom())
-            params.set("lat", e.latlng.lat)
-            params.set("lng",  e.latlng.lng)
-            router.replace(`?${params.toString()}`)
+            let newParam = new URLSearchParams(searchParams.toString())
+            newParam.set("zoom", map.getZoom())
+            newParam.set("lat", e.latlng.lat)
+            newParam.set("lng",  e.latlng.lng)
+            router.replace(`?${newParam.toString()}`)
 
             // set map view
             // console.log(e.latlng)
@@ -64,7 +64,7 @@ function Map(Map: MapProps){
 }
 
     return(
-        <div>
+        <Suspense>
             <MapContainer 
             center={params.size > 0 ? [params.get("lat"), params.get("lng")] : posix} 
             zoom={params.size > 0 ? params.get("zoom") : zoom}
@@ -83,7 +83,7 @@ function Map(Map: MapProps){
                 {params.size > 0 && <Marker position={[params.get("lat"), params.get("lng")]}/>}
 
             </MapContainer>
-        </div>
+        </Suspense>
     )
 }
 

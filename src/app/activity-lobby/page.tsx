@@ -21,7 +21,7 @@ export default function ActivityLobby() {
     const fetchUserID = async () => {
         // check session
         let isSession: boolean = false;
-        const res:any = await axios.get(`http://localhost:8000/api/v1/auth/auth/callback`, {withCredentials:true,})
+        const res:any = await axios.get(`https://painai-backend.graypebble-936b89d4.japanwest.azurecontainerapps.io/api/v1/auth/auth/callback`, {withCredentials:true,})
         .then((res)=>{
             isSession = true
             setIsAuth(true)
@@ -35,7 +35,7 @@ export default function ActivityLobby() {
         // find user id by email
         if (isSession) {
             const email = res.data.user.email
-            const resUser:any = await axios.get(`http://localhost:8000/api/v1/user/email/${email}`)
+            const resUser:any = await axios.get(`https://painai-backend.graypebble-936b89d4.japanwest.azurecontainerapps.io/api/v1/user/email/${email}`)
             return resUser.data.ID
         } else {
             return ""
@@ -44,13 +44,13 @@ export default function ActivityLobby() {
 
     // fetch username from creator id
     const fetchUser = async (userID:String) => {
-        const res:any = await axios.get(`http://localhost:8000/api/v1/user/id/${userID}`).catch((err)=>alert(err))
+        const res:any = await axios.get(`https://painai-backend.graypebble-936b89d4.japanwest.azurecontainerapps.io/api/v1/user/id/${userID}`).catch((err)=>alert(err))
         return res.data.data.DisplayName
     } 
 
     // fetch number of activiy member
     const fetchMember = async (activityID:String) => {
-        const res:any = await axios.get(`http://localhost:8000/api/v1/activity/${activityID}/members`).catch((err)=>alert(err))
+        const res:any = await axios.get(`https://painai-backend.graypebble-936b89d4.japanwest.azurecontainerapps.io/api/v1/activity/${activityID}/members`).catch((err)=>alert(err))
         const data:Array<any> = res.data
         return {
             "count": data.length,
@@ -60,7 +60,7 @@ export default function ActivityLobby() {
 
     // fetch activity + username
     const fetchData = async () => {
-        const res:any = await axios.get("http://localhost:8000/api/v1/activity/").catch((err)=>alert(err))
+        const res:any = await axios.get("https://painai-backend.graypebble-936b89d4.japanwest.azurecontainerapps.io/api/v1/activity/").catch((err)=>alert(err))
         let fData:Array<any> = res.data.data
 
         // sort decreasing date

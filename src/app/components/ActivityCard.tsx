@@ -75,7 +75,7 @@ export default function ActivityCard({
                     "activity_id": activityID,
                     "user_id": userID
                 }
-                const res:any = await axios.post("http://localhost:8000/api/v1/activity/join", body)
+                const res:any = await axios.post("https://painai-backend.graypebble-936b89d4.japanwest.azurecontainerapps.io/api/v1/activity/join", body)
                 
                 router.refresh()
             } else {
@@ -86,7 +86,7 @@ export default function ActivityCard({
             setOpenAuth(true)
         }
     }
-
+    
     const handleCancel = async () => {
         if (isAuth){
             // TODO: wait API cancel join

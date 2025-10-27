@@ -12,7 +12,7 @@ import { Box,
     DialogContent,
     DialogContentText,
 } from "@mui/material"
-import { ChangeEventHandler, useEffect } from "react";
+import { ChangeEventHandler, useEffect, Suspense, useState } from "react";
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -21,23 +21,21 @@ import theme from "../components/theme";
 import dayjs from "dayjs";
 
 import { useRouter, useSearchParams} from 'next/navigation'
-import { useState } from "react";
 import axios from "axios";
 import SideBarNavigator from "../components/SideBarNavigator";
 
 function page() {
-
+    
     const Map = dynamic(
         () => import("@/app/components/MapPin"), {
         ssr: false,
         loading: () => <p>Loading...</p>,
     });
 
-
     // state variables
     const router = useRouter()
     const searchParams = useSearchParams()
-    let params = new URLSearchParams(searchParams.toString())
+    // let params = new URLSearchParams(searchParams.toString())
     
     const [title, setTitle] = useState<String | null>("");
     const [location, setLocation] = useState<String | null>("");
@@ -49,14 +47,15 @@ function page() {
     const [userID, setUserID] = useState<string>("")
     const [openAuth, setOpenAuth] = useState<boolean>(false)
     const [openFill, setOpenFill] = useState<boolean>(false)
+    const [params, setParams] = useState(new URLSearchParams(searchParams.toString()))
 
     const fetchUserID = async () => {
-        const res:any = await axios.get("http://localhost:8000/api/v1/auth/auth/callback", {withCredentials:true})
+        const res:any = await axios.get("https://painai-backend.graypebble-936b89d4.japanwest.azurecontainerapps.io/api/v1/auth/auth/callback", {withCredentials:true})
         const email:string | null = res.data.user.email
         console.log(email)
         
         if (email !== ""){
-            const res:any = axios.get(`http://localhost:8000/api/v1/user/email/${email}`)
+            const res:any = axios.get(`https://painai-backend.graypebble-936b89d4.japanwest.azurecontainerapps.io/api/v1/user/email/${email}`)
             .then((res)=>{
                 setUserID(res.data.ID)
                 console.log(res.data.ID)
@@ -89,7 +88,7 @@ function page() {
             console.log(payload)
 
             try {
-                const res:any = await axios.post('http://localhost:8000/api/v1/activity/', payload, {withCredentials:true},)
+                const res:any = await axios.post('https://painai-backend.graypebble-936b89d4.japanwest.azurecontainerapps.io/api/v1/activity/', payload, {withCredentials:true},)
                 console.log('Response:', res.data);
                 router.push('/')
             } catch (err) {
@@ -104,6 +103,10 @@ function page() {
     useEffect(()=>{
         fetchUserID()
     },[])
+
+    useEffect(()=>{
+        setParams(new URLSearchParams(searchParams.toString()))
+    },[searchParams])
 
     const handleCloseAuth = () => {
         setOpenAuth(false);
@@ -150,6 +153,7 @@ function page() {
     }
 
     return (
+        <Suspense>
         <ThemeProvider theme={theme}>
             <SideBarNavigator/>
             <div>
@@ -355,6 +359,7 @@ function page() {
                 </DialogActions>
             </Dialog>
         </ThemeProvider>
+        </Suspense>
     )
 }
 

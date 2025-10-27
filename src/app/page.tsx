@@ -24,7 +24,7 @@ export default function Home() {
     
     const fetchData = async () => {
         await axios
-        .get("http://localhost:8000/api/v1/activity/")
+        .get("https://painai-backend.graypebble-936b89d4.japanwest.azurecontainerapps.io/api/v1/activity/")
         .then((res) => setData(res.data.data))
         .catch((err) => console.error(err));
     }

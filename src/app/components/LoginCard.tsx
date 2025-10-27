@@ -36,11 +36,11 @@ export default function LoginCard() {
             autoComplete="current-password"
           /> */}
 
-          <Button variant="contained" href="http://localhost:8000/api/v1/auth/google">
+          <Button variant="contained" href="https://painai-backend.graypebble-936b89d4.japanwest.azurecontainerapps.io/api/v1/auth/google">
             Login with Google
           </Button>
 
-          <Button variant="contained" href="http://localhost:8000/api/v1/auth/facebook">
+          <Button variant="contained" href="https://painai-backend.graypebble-936b89d4.japanwest.azurecontainerapps.io/api/v1/auth/facebook">
             Login with Facebook
           </Button>
 

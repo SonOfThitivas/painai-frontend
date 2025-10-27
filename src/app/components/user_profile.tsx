@@ -102,7 +102,7 @@ const UserProfile: React.FC = () => {
 
       // Step 1: Fetch email from auth API
       const authResponse = await fetch(
-        "http://localhost:8000/api/v1/auth/auth/callback",
+        "https://painai-backend.graypebble-936b89d4.japanwest.azurecontainerapps.io/api/v1/auth/auth/callback",
         {
           method: "GET",
           credentials: "include",
@@ -125,7 +125,7 @@ const UserProfile: React.FC = () => {
 
       // Step 2: Fetch user details using the email
       const userResponse = await fetch(
-        `http://localhost:8000/api/v1/user/email/${encodeURIComponent(
+        `https://painai-backend.graypebble-936b89d4.japanwest.azurecontainerapps.io/api/v1/user/email/${encodeURIComponent(
           userEmail
         )}`,
         {
@@ -192,7 +192,7 @@ const UserProfile: React.FC = () => {
         age: formData.age ? parseInt(formData.age) : null,
       };
 
-      const response = await fetch("http://localhost:8000/api/v1/user/profile", {
+      const response = await fetch("https://painai-backend.graypebble-936b89d4.japanwest.azurecontainerapps.io/api/v1/user/profile", {
         method: "PUT",
         credentials: "include",
         headers: {
@@ -256,8 +256,8 @@ const UserProfile: React.FC = () => {
       setActivitiesLoading(true);
       setActivitiesError(null);
       const response = await fetch(
-        `http://localhost:8000/api/v1/activity/by-user?user_id=${user.ID}`
-        // `http://localhost:8000/api/v1/activity/by-user?user_id=${"6ba208b0-f0a9-4ee8-8e3a-594085aaf31c"}`
+        `https://painai-backend.graypebble-936b89d4.japanwest.azurecontainerapps.io/api/v1/activity/by-user?user_id=${user.ID}`
+        // `https://painai-backend.graypebble-936b89d4.japanwest.azurecontainerapps.io/api/v1/activity/by-user?user_id=${"6ba208b0-f0a9-4ee8-8e3a-594085aaf31c"}`
       );
       if (!response.ok) throw new Error(`API error: ${response.status}`);
       const data: Activity[] = await response.json();
@@ -350,7 +350,7 @@ const UserProfile: React.FC = () => {
         console.log(`FormData: ${key} =`, value);
       }
 
-      const response = await fetch('http://localhost:8000/api/v1/user/UpdateAvartarData', {
+      const response = await fetch('https://painai-backend.graypebble-936b89d4.japanwest.azurecontainerapps.io/api/v1/user/UpdateAvartarData', {
         method: 'PUT',
         credentials: 'include',
         body: formData, // Don't set Content-Type header, let browser set it with boundary
